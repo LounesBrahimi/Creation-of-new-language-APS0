@@ -38,8 +38,8 @@ def newDefConst(char* id_, type type_, Sexpr expr_){
 	c->content.defConst.id = id_;
 	c->content.defConst.type_ = type_->content.typePrim;
 	c->content.defConst.expr = expr_;
-	printDef(c);
-	printf("\n");
+	/*printDef(c);
+	printf("\n");*/
 	return c;
 }
 
@@ -50,8 +50,8 @@ def newDefFun(char* id_, type type_, arg arg_, Sexpr expr_){
 	c->content.defFun.type_ = type_;
 	c->content.defFun.arg_ = arg_;
 	c->content.defFun.expr = expr_;
-	printDef(c);
-	printf("\n");
+	/*printDef(c);
+	printf("\n");*/
 	return c;
 }
 
@@ -62,8 +62,8 @@ def newDefRecFun(char* id_, type type_, arg arg_, Sexpr expr_){
 	c->content.defFun.type_ = type_;
 	c->content.defFun.arg_ = arg_;
 	c->content.defFun.expr = expr_;
-	printDef(c);
-	printf("\n\n");
+	/*printDef(c);
+	printf("\n\n");*/
 	return c;
 }
 
@@ -129,6 +129,38 @@ Sexpr newASTApp(Sexpr e, Sexprs es) {
   r->content.app.fun = e;
   r->content.app.args = es;
   return r;
+}
+
+void add_expr_prog(prog* prog_ , Sexpr expr){
+	int i = prog_->size;
+	prog_->size++;
+	prog_->cmds = realloc(prog_->cmds, (prog_->size)*sizeof(cmd));
+	prog_->cmds[i].type_ = 1;
+	prog_->cmds[i].expr = expr;
+}
+
+void add_def_const_prog(prog* prog_ , def def_){
+	int i = prog_->size;
+	prog_->size++;
+	prog_->cmds = realloc(prog_->cmds, (prog_->size)*sizeof(cmd));
+	prog_->cmds[i].type_ = 2;
+	prog_->cmds[i].def_const = def_;
+}
+
+void add_def_fun_prog(prog* prog_ , def def_){
+	int i = prog_->size;
+	prog_->size++;
+	prog_->cmds = realloc(prog_->cmds, (prog_->size)*sizeof(cmd));
+	prog_->cmds[i].type_ = 3;
+	prog_->cmds[i].def_fun = def_;
+}
+
+void add_def_rec_prog(prog* prog_ , def def_){
+	int i = prog_->size;
+	prog_->size++;
+	prog_->cmds = realloc(prog_->cmds, (prog_->size)*sizeof(cmd));
+	prog_->cmds[i].type_ = 4;
+	prog_->cmds[i].def_rec = def_;
 }
 
 Sexprs addSexpr(Sexpr e, Sexprs es) {

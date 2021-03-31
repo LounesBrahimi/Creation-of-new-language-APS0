@@ -25,7 +25,7 @@ int yyerror (char *);
 
  Sexpr theExpr;
  def def_const;
- 
+ prog* prog_ = NULL;
 %}
 
 %token<str>  CONST
@@ -88,13 +88,13 @@ cmds:
 | def SEMICOLON cmds      { $$ = $3; }  
   ;
 
-stat: ECHO expr		   { $$ = $2; }
+stat: ECHO expr		   { add_expr_prog(prog_, $2); $$ = $2; }
   ;
 
 def: 
-  CONST IDENT type expr		{ $$ = newDefConst($2, $3, $4); }
-| FUN IDENT type LSQBR args RSQBR expr { $$ = newDefFun($2, $3, $5, $7); }
-| FUN REC IDENT type LSQBR args RSQBR expr { $$ = newDefRecFun($3, $4, $6, $8); }
+  CONST IDENT type expr		{ add_def_const_prog(prog_, newDefConst($2, $3, $4)); $$ = newDefConst($2, $3, $4); }
+| FUN IDENT type LSQBR args RSQBR expr { add_def_fun_prog(prog_, newDefFun($2, $3, $5, $7)); $$ = newDefFun($2, $3, $5, $7); }
+| FUN REC IDENT type LSQBR args RSQBR expr { add_def_rec_prog(prog_, newDefRecFun($3, $4, $6, $8)); $$ = newDefRecFun($3, $4, $6, $8); }
   ;
 
 args:
@@ -154,11 +154,14 @@ int main(int argc, char **argv) {
     return 1;
   }
   FILE* infile = freopen(argv[1], "r", stdin);
+  prog_ = malloc(sizeof(prog));
+  prog_->size = 0;
   yyparse();
   fclose(infile);
-  printf("echo(");
-  printSexpr(theExpr);
-  printf(")");
+  printf("prog([");
+  //printSexpr(theExpr);
+  print_prog(prog_);
+  printf("])");
   //printDef(def_const);
   printf(".\n");
   return 0;

@@ -1,4 +1,4 @@
 [
-# bonjour
-	ECHO (if true 5 7)
+	CONST a int 42;
+	ECHO (g 255)
 ]

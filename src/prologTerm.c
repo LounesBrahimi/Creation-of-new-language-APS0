@@ -26,9 +26,9 @@ void printBoolean(char* x) {
 
 void printDefConst(def c){
 	switch(c->content.defConst.expr->tag) {
-		case ASTNum : printf("defConst("); printId(c->content.defConst.id); printf(", type(%s), ", c->content.defConst.type_); printNum(c->content.defConst.expr->content.num);  printf(")."); break;
+		case ASTNum : printf("defConst("); printId(c->content.defConst.id); printf(", type(%s), ", c->content.defConst.type_); printNum(c->content.defConst.expr->content.num);  printf(")"); break;
 /*supr*/case ASTId :  printf("Const %s %s %s", c->content.defConst.id, c->content.defConst.type_, c->content.defConst.expr->content.id); break;
-		case ASTBool :printf("defConst("); printId(c->content.defConst.id); printf(", type(%s), ", c->content.defConst.type_); printBoolean(c->content.defConst.expr->content.boolean); printf(")."); break;
+		case ASTBool :printf("defConst("); printId(c->content.defConst.id); printf(", type(%s), ", c->content.defConst.type_); printBoolean(c->content.defConst.expr->content.boolean); printf(")"); break;
 	}
 }
 
@@ -57,7 +57,7 @@ void printDefFun(def c){
 		case ASTId :  printf("Fun %s ",c->content.defFun.id); printType(c->content.defFun.type_); printArgs(c->content.defFun.arg_);	printf("%s",c->content.defFun.expr->content.id); break;
 		case ASTBool :printf("Fun %s ", c->content.defFun.id); printType(c->content.defFun.type_); printArgs(c->content.defFun.arg_); printf(" %s", c->content.defFun.expr->content.boolean); break;
 	}*/
-	printf("defFun("); printId(c->content.defFun.id);printf(", "); printType(c->content.defFun.type_); printf(", "); printArgs(c->content.defFun.arg_); printf(", "); printSexpr(c->content.defFun.expr); printf(").");
+	printf("defFun("); printId(c->content.defFun.id);printf(", "); printType(c->content.defFun.type_); printf(", "); printArgs(c->content.defFun.arg_); printf(", "); printSexpr(c->content.defFun.expr); printf(")");
 }
 
 void printDefRecFun(def c){
@@ -66,7 +66,7 @@ void printDefRecFun(def c){
 		case ASTId :  printf("Fun Rec %s ",c->content.defRecFun.id); printType(c->content.defFun.type_); printArgs(c->content.defRecFun.arg_);	printf("%s",c->content.defRecFun.expr->content.id); break;
 		case ASTBool :printf("Fun Rec %s ", c->content.defRecFun.id); printType(c->content.defFun.type_); printArgs(c->content.defRecFun.arg_); printf(" %s", c->content.defRecFun.expr->content.boolean); break;
 	}*/
-	printf("defFunRec(");printId(c->content.defRecFun.id); printf(", "); printType(c->content.defFun.type_); printf(", "); printArgs(c->content.defRecFun.arg_); printf(", "); printSexpr(c->content.defRecFun.expr); printf(").");
+	printf("defFunRec(");printId(c->content.defRecFun.id); printf(", "); printType(c->content.defFun.type_); printf(", "); printArgs(c->content.defRecFun.arg_); printf(", "); printSexpr(c->content.defRecFun.expr); printf(")");
 }
 
 void printDef(def c){
@@ -190,4 +190,26 @@ void printSexprs(Sexprs es) {
     };
     printSexpr(es->head);
   }
+}
+
+void print_prog(prog* prog_){
+	int i;
+	for(i=0; i<prog_->size; i++){
+		if(i) printf(", ");
+		if(prog_->cmds[i].type_ == 1){
+			if(i == (prog_->size-1)){
+				printf("echo(");
+				printSexpr(prog_->cmds[i].expr);
+				printf(")");
+			} else {
+				printSexpr(prog_->cmds[i].expr);
+			}
+		} else if(prog_->cmds[i].type_ == 2){
+			printDefConst(prog_->cmds[i].def_const);
+		} else if(prog_->cmds[i].type_ == 3){
+			printDefFun(prog_->cmds[i].def_fun);
+		} else if(prog_->cmds[i].type_ == 4){
+			printDefRecFun(prog_->cmds[i].def_rec);
+		}
+	}
 }

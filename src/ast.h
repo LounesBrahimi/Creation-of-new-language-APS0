@@ -15,6 +15,8 @@ typedef struct _sexprs *Sexprs;
 typedef struct _def *def;
 typedef struct _arg *arg;
 typedef struct _type *type;
+typedef struct _prog prog;
+typedef struct _cmd cmd;
 typedef enum _tag Tag;
 typedef enum _tag_def Tag_def;
 typedef enum _tag_type tag_type;
@@ -166,6 +168,24 @@ type addTypeMulty(type type_1, type type_2);
 type addTypeFun(type type_1, type type_2);
 
 Sexprs addSexpr(Sexpr e, Sexprs es);
+
+struct _prog {
+	int size;
+	cmd* cmds;
+};
+
+struct _cmd{
+		int type_;
+		Sexpr expr;
+		def def_const;
+		def def_fun;
+		def def_rec;
+};
+
+void add_expr_prog(prog* prog_ , Sexpr expr);
+void add_def_const_prog(prog* prog_ , def def_);
+void add_def_fun_prog(prog* prog_ , def def_);
+void add_def_rec_prog(prog* prog_ , def def_);
 
 #define mallocSexpr malloc(sizeof(struct _sexpr))
 #define mallocSexprs malloc(sizeof(struct _sexprs))
