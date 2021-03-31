@@ -1,0 +1,4 @@
+[ 
+FUN REC f ((int -> bool) -> (int -> bool)) [y:bool,x:int, a: int] 5;
+ECHO 5 
+]
