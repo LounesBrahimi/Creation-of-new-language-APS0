@@ -26,9 +26,9 @@ expr(G, bool, if(COND, CONS, ALT)) :- expr(G, bool, COND), expr(G, bool, CONS), 
 %%
 dec(G, (def(id(X), T, E)), [(X,T)|G]) :- expr(G, T, E).
 
-stat(G, ech(num(N)), void) :- expr(G, int,num(N)).%% int echo
-stat(G, ech(boolean(B)), void) :- expr(G, bool,boolean(B)).%% bool echo
-stat(G, ech(id(X)), void) :- expr(G, id(X), int).%% bool id
+%%stat(G, ech(num(N)), void) :- expr(G, int,num(N)).%% int echo
+%%stat(G, ech(boolean(B)), void) :- expr(G, bool,boolean(B)).%% bool echo
+%%stat(G, ech(id(X)), void) :- expr(G, id(X), int).%% bool id
 
 defConst(_, type(T), E) :- expr(_, T, E).
 %%
@@ -45,7 +45,21 @@ lt(E1, E2) :- expr(_, bool, lt(E1, E2)).
 if(COND, CONS, ALT) :- expr(_, int, if(COND, CONS, ALT)).
 if(COND, CONS, ALT) :- expr(_, bool, if(COND, CONS, ALT)).
 %%
-echo(E) :- stat([], ech(E), void).
+%%echo(E) :- stat([], ech(E), void).
+
+%%decs
+decs(G, (id(X),TYPE,EXPR), [(X,TYPE)|G]):- expr(G, TYPE, EXPR).
+
+%%stat
+stat(G, EXPR, void) :- expr(G, int, EXPR).
+
+%%cmds
+cmds(_, [], void).
+cmds(G, [defConst(id(X),type(T),EXPR)|LCMDS], void) :- decs(G,(id(X),T,EXPR),NEWG) ,cmds(NEWG, LCMDS, void).
+cmds(G, [echo(EXPR)|LCMDS], void) :- stat(G, EXPR, void), cmds(G, LCMDS, void).
+
+%%prog
+prog(LCMDS) :- cmds([], LCMDS, void).
 
 %%typeCheck(P,ok) :- typeProg(P).
 typeCheck(num(N),ok) :- num(N).

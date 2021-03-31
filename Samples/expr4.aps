@@ -1,4 +1,4 @@
 [
 	CONST a int 42;
-	ECHO (g 255)
+	ECHO a
 ]
