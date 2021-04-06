@@ -43,10 +43,10 @@ void printType(type t){
 void printArgs(arg a){
 	arg tmp = a;
 	
-	printf("args([%s:%s", tmp->id, tmp->type_);
+	printf("args([(%s,%s)", tmp->id, tmp->type_);
 	while (tmp->suivant != NULL){ 
         tmp = tmp->suivant;
-        printf(", %s:%s", tmp->id, tmp->type_);
+        printf(", (%s,%s)", tmp->id, tmp->type_);
 	}
 	printf("])");
 }

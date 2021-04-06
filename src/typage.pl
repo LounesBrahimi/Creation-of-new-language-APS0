@@ -47,15 +47,21 @@ if(COND, CONS, ALT) :- expr(_, bool, if(COND, CONS, ALT)).
 %%
 %%echo(E) :- stat([], ech(E), void).
 
+%%stat
+stat(G,EXPR,void) :- expr(G,int,EXPR).
+
+%%fun
+fun(G,(TYPE,[],EXPR)) :- expr(G,TYPE,EXPR).
+fun(G,(TYPE,[ARG|ARGS],EXPR)) :- fun([ARG|G],(TYPE,ARGS,EXPR)).
+
 %%decs
 decs(G, (id(X),TYPE,EXPR), [(X,TYPE)|G]):- expr(G, TYPE, EXPR).
-
-%%stat
-stat(G, EXPR, void) :- expr(G, int, EXPR).
+decfun(G,(id(X),TYPE,ARGS,EXPR),[(X,TYPE)|G]) :- fun(G,(TYPE,ARGS,EXPR)).
 
 %%cmds
 cmds(_, [], void).
 cmds(G, [defConst(id(X),type(T),EXPR)|LCMDS], void) :- decs(G,(id(X),T,EXPR),NEWG) ,cmds(NEWG, LCMDS, void).
+cmds(G, [defFun(id(X),type(T), args(ARGS), EXPR)|LCMDS], void) :- decfun(G,(id(X),T,ARGS,EXPR),NEWG) ,cmds(NEWG, LCMDS, void).
 cmds(G, [echo(EXPR)|LCMDS], void) :- stat(G, EXPR, void), cmds(G, LCMDS, void).
 
 %%prog
