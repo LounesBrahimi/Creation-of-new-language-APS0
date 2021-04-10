@@ -1,16 +1,19 @@
 assoc(X, [(X,V)|_], V).
 assoc(X, [_|XVs], V) :- assoc(X, XVs, V).
 
+%% constantes numeriques
 num(N) :- integer(N).
+
+%% constantes booleennes
 boolean(true).
 boolean(false).
-%%id(X).
 
+%% expressions atomiques
 expr(_, int, num(N)) :- num(N).
 expr(_ , bool, boolean(B)) :- boolean(B).
-%%expr(G, T, id(X)) :- id(X), assoc(X, G, T).
 expr(G, T, id(X)) :- assoc(X, G, T).
-%%
+
+%% fonctions primitives
 expr(G, int, add(E1, E2)) :- expr(G, int, E1), expr(G, int, E2).
 expr(G, int, sub(E1, E2)) :- expr(G, int, E1), expr(G, int, E2).
 expr(G, int, mul(E1, E2)) :- expr(G, int, E1), expr(G, int, E2).
@@ -20,9 +23,21 @@ expr(G, bool, or(E1, E2)) :- expr(G, bool, E1), expr(G, bool, E2).
 expr(G, bool, not(E)) :- expr(G, bool, E).
 expr(G, bool, eq(E1, E2)) :- expr(G, int, E1), expr(G, int, E2).
 expr(G, bool, lt(E1, E2)) :- expr(G, int, E1), expr(G, int, E2).
-%%
+
+%% if
 expr(G, int, if(COND, CONS, ALT)) :- expr(G, bool, COND), expr(G, int, CONS), expr(G, int, ALT).
 expr(G, bool, if(COND, CONS, ALT)) :- expr(G, bool, COND), expr(G, bool, CONS), expr(G, bool, ALT).
+
+%% appication
+expr(G, TYPE, app(EXPR,AEXPR)) :- typeaexprs(G,AEXPR,TYPESAE), expr(G,arrow(TYPESAE,TYPE),EXPR).
+
+%% abstraction
+expr(G,arrow(TYPES,TYPE),abst(args(ARGS),EXPR)) :- typeargs(ARGS,TYPES),append(ARGS,G,NEWG),expr(NEWG,TYPE,EXPR).
+
+%%recupere le type des expressions pour l'application
+typeaexprs(G,[E|[]],[TYPE]) :- expr(G,TYPE, E).
+typeaexprs(G,[E|ES],[TYPE|TYPES]) :- expr(G,TYPE,E) , typeaexprs(G,ES,TYPES).
+
 %%
 dec(G, (def(id(X), T, E)), [(X,T)|G]) :- expr(G, T, E).
 
@@ -50,20 +65,25 @@ if(COND, CONS, ALT) :- expr(_, bool, if(COND, CONS, ALT)).
 %%stat
 stat(G,EXPR,void) :- expr(G,int,EXPR).
 
+%%recupere le type des arguments
+typeargs([(_,T)],[T]).
+typeargs([(_,T)|AA], [T|TT]) :- typeargs(AA,TT).
+
 %%fun
 fun(G,(TYPE,[],EXPR)) :- expr(G,TYPE,EXPR).
 fun(G,(TYPE,[ARG|ARGS],EXPR)) :- fun([ARG|G],(TYPE,ARGS,EXPR)).
 
 %%decs
 decs(G, (id(X),TYPE,EXPR), [(X,TYPE)|G]):- expr(G, TYPE, EXPR).
-decfun(G,(id(X),TYPE,ARGS,EXPR),[(X,TYPE)|G]) :- fun(G,(TYPE,ARGS,EXPR)).
+decfun(G,(id(X),TYPE,ARGS,EXPR),[(X,arrow(TYPEARGS,TYPE))|G]) :- fun(G,(TYPE,ARGS,EXPR)), typeargs(ARGS, TYPEARGS).
+decfunrec(G,(id(X),TYPE,ARGS,EXPR),[(X,arrow(TYPEARGS,TYPE))|G]) :- fun(G,(TYPE,[(X,arrow(TYPEARGS,TYPE))|ARGS],EXPR)), typeargs(ARGS, TYPEARGS).
 
 %%cmds
 cmds(_, [], void).
 cmds(G, [defConst(id(X),type(T),EXPR)|LCMDS], void) :- decs(G,(id(X),T,EXPR),NEWG) ,cmds(NEWG, LCMDS, void).
 cmds(G, [defFun(id(X),type(T), args(ARGS), EXPR)|LCMDS], void) :- decfun(G,(id(X),T,ARGS,EXPR),NEWG) ,cmds(NEWG, LCMDS, void).
+cmds(G, [defFunRec(id(X),type(T), args(ARGS), EXPR)|LCMDS], void) :- decfunrec(G,(id(X),T,ARGS,EXPR),NEWG) ,cmds(NEWG, LCMDS, void).
 cmds(G, [echo(EXPR)|LCMDS], void) :- stat(G, EXPR, void), cmds(G, LCMDS, void).
-
 %%prog
 prog(LCMDS) :- cmds([], LCMDS, void).
 
@@ -81,3 +101,6 @@ main_stdin :-
 	print(R),
 	nl,
 	exitCode(R).
+
+%%expr(G, T, id(X)) :- id(X), assoc(X, G, T).
+%%id(X).
