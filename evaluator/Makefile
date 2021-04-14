@@ -11,10 +11,11 @@ LEX_C = flex
 YACC_C = yacc
 GCC = gcc
 
-prologTerm: parser ast.h ast.c prologTerm.c
+prologTerm: parser ast.h ast.c prologTerm.c evaluator.c
 	$(GCC) -c ast.c
+	$(GCC) -c evaluator.c
 	$(GCC) -c prologTerm.c
-	$(GCC) -o prologTerm ast.o prologTerm.o lex.yy.o y.tab.o -lm -ll
+	$(GCC) -o prologTerm evaluator.o ast.o prologTerm.o lex.yy.o y.tab.o -lm -ll
 
 parser: lexer.lex parser.y
 	$(YACC_C) -d parser.y
@@ -28,6 +29,3 @@ clean:
 	rm -f *.o
 	rm -f *~
 	rm -f prologTerm
-
-
-

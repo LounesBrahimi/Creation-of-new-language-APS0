@@ -17,7 +17,7 @@
 
 #include <math.h>
 
-#include "ast.h"
+#include "evaluator.h"
 #include "prologTerm.h"
 
 int yylex (void);
@@ -164,5 +164,6 @@ int main(int argc, char **argv) {
   printf("])");
   //printDef(def_const);
   printf(".\n");
+  eval_prog(prog_);
   return 0;
 }
