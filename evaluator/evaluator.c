@@ -4,7 +4,7 @@ int cherche_id_env(env* env_, char* id){
 	env* p = env_;
 	while(p != NULL){
 		if (!(strcmp(p->id, id))){
-			return p->valeur;
+			return p->content.valeur;
 		}
 		else {
 			p = p->suite;
@@ -74,12 +74,50 @@ int eval_expr(env* env_, Sexpr expr){
     }	
 }
 
+env* copy_env(env* env_){
+	env* p = env_;
+	env* copy = malloc(sizeof(env));
+	env* p_copy = copy;
+	while (p != NULL) { 
+		p_copy->id = p->id;
+		p_copy->tag = p->tag;
+		if (p_copy->tag == ASTConst){
+			p_copy->content.valeur = p->content.valeur;
+		} else if (p_copy->tag == ASTFun){
+			p_copy->content.def_fun.closure_ = p->content.def_fun.closure_;
+		} else {
+			p_copy = NULL;
+		}
+		p = p->suite;
+		if(p != NULL){
+			p_copy->suite = NULL;
+			p_copy->suite = malloc(sizeof(env));
+			p_copy = p_copy->suite;
+		}		
+	}
+	if (env_ == NULL) copy = NULL;
+	return copy;
+}
+
+env* eval_def_fun(def def_fun, env* env_){
+	env* new_env = malloc(sizeof(env));
+	new_env->id = def_fun->content.defFun.id;
+	new_env->tag = ASTFun;
+	new_env->content.def_fun.closure_ = malloc(sizeof(closure));
+	new_env->content.def_fun.closure_->corp = def_fun->content.defFun.expr;
+	new_env->content.def_fun.closure_->arg_ = def_fun->content.defFun.arg_;
+	new_env->content.def_fun.closure_->env_ = copy_env(env_);
+	new_env->suite = env_;
+	return new_env;
+}
+
 env* eval_def_const(def def_const, env* env_){
 	env* new_env = malloc(sizeof(env));
+	new_env->tag = ASTConst;
 	new_env->id = def_const->content.defConst.id;
 	int valeur_expr;
 	valeur_expr = eval_expr(env_, def_const->content.defConst.expr);
-	new_env->valeur = valeur_expr;
+	new_env->content.valeur = valeur_expr;
 	new_env->suite = env_;
 	return new_env;
 }
@@ -89,7 +127,14 @@ void print_env(env* env_){
 	while(p != NULL){
 		printf("=========\n");
 		printf("id : %s\n", p->id);
-		printf("v : %d\n", p->valeur);
+		if (p->tag == ASTConst)
+			printf("v : %d\n", p->content.valeur);
+		else {
+			printf("closure : \n");
+			printf("expr : ");printSexpr(p->content.def_fun.closure_->corp);printf("\n");
+			printf("args : ");printArgs(p->content.def_fun.closure_->arg_);printf("\n");
+			printf("env : ");print_env(p->content.def_fun.closure_->env_);printf("\n");
+		}
 		p = p->suite;
 	}
 }
@@ -112,6 +157,9 @@ void eval_prog(prog* prog_){
 					break;
 			case 2: // def_const
 					env_ = eval_def_const(prog_->cmds[i].def_const, env_);
+					break;
+			case 3: // def_fun
+					env_ = eval_def_fun(prog_->cmds[i].def_fun, env_);
 					break;
 			default:
 					printf("Erreur\n");

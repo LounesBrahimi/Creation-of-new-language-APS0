@@ -16,3 +16,4 @@ void printDefRecFun(def);
 void printDef(def);
 void printType(type);
 void print_prog(prog* prog_);
+void printArgs(arg a);
