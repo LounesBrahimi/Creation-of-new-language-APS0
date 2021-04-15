@@ -6,6 +6,7 @@
 
 typedef struct _env env;
 typedef struct _closure closure;
+typedef struct _closure_rec closure_rec;
 typedef struct _ids ids;
 typedef struct _valeurs valeurs;
 
@@ -18,7 +19,17 @@ struct _env {
 		struct {
 			closure* closure_;
 		} def_fun;
+		struct {
+			closure_rec* closure_rec_;
+		} def_rec;
 	} content;
+};
+
+struct _closure_rec {
+	char* id;
+	Sexpr corp;
+	ids* ids_;
+	env*  env_;
 };
 
 struct _closure {
