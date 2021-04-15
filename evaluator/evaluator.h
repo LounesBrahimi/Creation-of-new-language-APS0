@@ -7,6 +7,7 @@
 typedef struct _env env;
 typedef struct _closure closure;
 typedef struct _ids ids;
+typedef struct _valeurs valeurs;
 
 struct _env {
 	Tag_def tag;
@@ -31,6 +32,15 @@ struct _ids {
 	int size;
 };
 
+struct _valeurs {
+	int* v;
+	int size;
+};
+
+env* lier_args_vals_env(env* env_, ids* ids_, valeurs* valeurs_);
+void printValeurs(valeurs* valeurs_);
+valeurs* exprs_to_valeurs(env* env_, Sexprs es);
+closure* get_closure(env* env_, char* id);
 void printIds(ids* ids_);
 ids* args_to_ids(arg arg_);
 env* eval_def_fun(def def_fun, env* env_);

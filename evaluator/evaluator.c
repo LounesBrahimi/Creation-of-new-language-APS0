@@ -8,6 +8,14 @@ void printIds(ids* ids_){
 	printf("\n");
 }
 
+void printValeurs(valeurs* valeurs_){
+	int i;
+	for(i=0; i<valeurs_->size; i++){
+		printf("%d ", valeurs_->v[i]);
+	}
+	printf("\n");
+}
+
 ids* args_to_ids(arg arg_){
 	arg p = arg_;
 	ids* ids_ = malloc(sizeof(ids));
@@ -36,6 +44,58 @@ int cherche_id_env(env* env_, char* id){
 		}
 	}
 	return -2;
+}
+
+closure* get_closure(env* env_, char* id){
+	env* p = env_;
+	while(p != NULL){
+		if (!(strcmp(p->id, id))){
+			if (p->tag == ASTFun)
+				return p->content.def_fun.closure_;
+		}
+		else {
+			p = p->suite;
+		}
+	}
+	return NULL;
+}
+
+valeurs* exprs_to_valeurs(env* env_, Sexprs es){
+	Sexprs p = es;
+	valeurs* valeurs_ = malloc(sizeof(valeurs));
+	valeurs_->v = NULL;
+	int size = 0;
+	int i = 0;
+	while(p != NULL){
+		size++;
+		valeurs_->v = realloc(valeurs_->v, size*sizeof(int));
+		valeurs_->v[i] = eval_expr(env_, es->head);
+		i++;
+		p = p->tail;
+	}
+	valeurs_->size = size;
+	return valeurs_;	
+}
+
+env* lier_args_vals_env(env* env_, ids* ids_, valeurs* valeurs_){
+	env* new_env = NULL;
+	env* p = NULL;
+	int i;
+	for(i=0; i<ids_->size; i++){
+		if (i) {
+			p = new_env;
+		}
+		new_env = malloc(sizeof(env));
+		new_env->tag = ASTConst;
+		new_env->id = ids_->arg_[i];
+		new_env->content.valeur = valeurs_->v[i];
+		if (i) {
+			new_env->suite = p;
+		} else {
+			new_env->suite = env_;
+		}	
+	} 
+	return new_env;
 }
 
 int eval_expr(env* env_, Sexpr expr){
@@ -94,6 +154,24 @@ int eval_expr(env* env_, Sexpr expr){
 					return eval_expr(env_, expr->content.if_.cons);
 					else return eval_expr(env_, expr->content.if_.alt);
 				break;
+		case ASTApp:{
+				Sexpr e = expr->content.app.fun;
+				Sexprs es = expr->content.app.args;
+				if (e->tag == ASTFun) {
+					closure* closure_ = get_closure(env_, e->content.id);
+					valeurs* valeurs_ = exprs_to_valeurs(env_, es);
+					env_ = lier_args_vals_env(env_, closure_->ids_, valeurs_);
+					//printf("###\n");
+					//printSexpr(e);
+					//printValeurs(valeurs_);
+					//print_env(env_);
+					//printf("\n###\n");
+					return eval_expr(env_, closure_->corp);
+				} else {
+					return 5;
+				} 
+				break;
+				}
 		default:
 				return -3;
     }	
