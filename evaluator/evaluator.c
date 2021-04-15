@@ -52,6 +52,24 @@ closure* get_closure(env* env_, char* id){
 		if (!(strcmp(p->id, id))){
 			if (p->tag == ASTFun)
 				return p->content.def_fun.closure_;
+			else 
+				p = p->suite;
+		}
+		else {
+			p = p->suite;
+		}
+	}
+	return NULL;
+}
+
+closure_rec* get_closure_rec(env* env_, char* id){
+	env* p = env_;
+	while(p != NULL){
+		if (!(strcmp(p->id, id))){
+			if (p->tag == ASTRecFun)
+				return p->content.def_rec.closure_rec_;
+			else
+				p = p->suite;
 		}
 		else {
 			p = p->suite;
@@ -95,6 +113,15 @@ env* lier_args_vals_env(env* env_, ids* ids_, valeurs* valeurs_){
 			new_env->suite = env_;
 		}	
 	} 
+	return new_env;
+}
+
+env* ajout_closure_rec_env(env* env_, closure_rec* closure_rec_){
+	env* new_env = malloc(sizeof(env));
+	new_env->id = closure_rec_->id;
+	new_env->tag = ASTRecFun;
+	new_env->content.def_rec.closure_rec_ = closure_rec_;
+	new_env->suite = env_;
 	return new_env;
 }
 
@@ -157,11 +184,21 @@ int eval_expr(env* env_, Sexpr expr){
 		case ASTApp:{
 				Sexpr e = expr->content.app.fun;
 				Sexprs es = expr->content.app.args;
-				if (e->tag == ASTFun) {
+				printf("###\n");
+				print_env(env_);
+				printf("\n###\n");
+				printf("id => %s\n", getId(e));printf("###\n");
+				if ((get_closure(env_, getId(e))) != NULL) {printf("###ici1\n");
 					closure* closure_ = get_closure(env_, e->content.id);
 					valeurs* valeurs_ = exprs_to_valeurs(env_, es);
-					env_ = lier_args_vals_env(env_, closure_->ids_, valeurs_);
-					return eval_expr(env_, closure_->corp);
+					env* env_tmp = lier_args_vals_env(closure_->env_, closure_->ids_, valeurs_);
+					return eval_expr(env_tmp, closure_->corp);
+				} else if ((get_closure_rec(env_, getId(e))) != NULL) {printf("###ici2\n");
+					closure_rec* closure_rec_ = get_closure_rec(env_, e->content.id);
+					valeurs* valeurs_ = exprs_to_valeurs(env_, es);
+					env* env_tmp = lier_args_vals_env(closure_rec_->env_, closure_rec_->ids_, valeurs_);				
+					env_tmp = ajout_closure_rec_env(env_tmp, closure_rec_);
+					return eval_expr(env_tmp, closure_rec_->corp);
 				} else {
 					return 5;
 				} 
@@ -273,8 +310,12 @@ void eval_prog(prog* prog_){
 	while (i < size) {
 		switch (prog_->cmds[i].type_) {
 			case 1: // expr
+			{
+					printf("###ici\n");
 					valeur = eval_expr(env_, prog_->cmds[i].expr);
+					printf("###ici\n");
 					break;
+				}
 			case 2: // def_const
 					env_ = eval_def_const(prog_->cmds[i].def_const, env_);
 					break;
