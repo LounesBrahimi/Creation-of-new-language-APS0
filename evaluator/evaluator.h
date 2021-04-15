@@ -6,6 +6,7 @@
 
 typedef struct _env env;
 typedef struct _closure closure;
+typedef struct _ids ids;
 
 struct _env {
 	Tag_def tag;
@@ -21,10 +22,17 @@ struct _env {
 
 struct _closure {
 	Sexpr corp;
-	arg   arg_;
+	ids* ids_;
 	env*  env_;
 };
 
+struct _ids {
+	char** arg_;
+	int size;
+};
+
+void printIds(ids* ids_);
+ids* args_to_ids(arg arg_);
 env* eval_def_fun(def def_fun, env* env_);
 void print_env(env* env_);
 int cherche_id_env(env* env_, char* id);

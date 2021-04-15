@@ -1,5 +1,30 @@
 #include "evaluator.h"
 
+void printIds(ids* ids_){
+	int i;
+	for(i=0; i<ids_->size; i++){
+		printf("%s ", ids_->arg_[i]);
+	}
+	printf("\n");
+}
+
+ids* args_to_ids(arg arg_){
+	arg p = arg_;
+	ids* ids_ = malloc(sizeof(ids));
+	ids_->arg_ = NULL;
+	int size = 0;
+	int i = 0;
+	while(p != NULL){
+		size++;
+		ids_->arg_ = realloc(ids_->arg_, size*sizeof(char*));
+		ids_->arg_[i] = p->id;
+		i++;
+		p = p->suivant;
+	}
+	ids_->size = size;
+	return ids_;
+}
+
 int cherche_id_env(env* env_, char* id){
 	env* p = env_;
 	while(p != NULL){
@@ -105,7 +130,8 @@ env* eval_def_fun(def def_fun, env* env_){
 	new_env->tag = ASTFun;
 	new_env->content.def_fun.closure_ = malloc(sizeof(closure));
 	new_env->content.def_fun.closure_->corp = def_fun->content.defFun.expr;
-	new_env->content.def_fun.closure_->arg_ = def_fun->content.defFun.arg_;
+	new_env->content.def_fun.closure_->ids_ = malloc(sizeof(ids));
+	new_env->content.def_fun.closure_->ids_ = args_to_ids(def_fun->content.defFun.arg_);
 	new_env->content.def_fun.closure_->env_ = copy_env(env_);
 	new_env->suite = env_;
 	return new_env;
@@ -132,7 +158,7 @@ void print_env(env* env_){
 		else {
 			printf("closure : \n");
 			printf("expr : ");printSexpr(p->content.def_fun.closure_->corp);printf("\n");
-			printf("args : ");printArgs(p->content.def_fun.closure_->arg_);printf("\n");
+			printf("args : ");printIds(p->content.def_fun.closure_->ids_);printf("\n");
 			printf("env : ");print_env(p->content.def_fun.closure_->env_);printf("\n");
 		}
 		p = p->suite;
