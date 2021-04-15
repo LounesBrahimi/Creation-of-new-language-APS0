@@ -79,15 +79,15 @@ closure_rec* get_closure_rec(env* env_, char* id){
 }
 
 valeurs* exprs_to_valeurs(env* env_, Sexprs es){
-	Sexprs p = es;
+	Sexprs p = es; 
 	valeurs* valeurs_ = malloc(sizeof(valeurs));
 	valeurs_->v = NULL;
 	int size = 0;
 	int i = 0;
 	while(p != NULL){
 		size++;
-		valeurs_->v = realloc(valeurs_->v, size*sizeof(int));
-		valeurs_->v[i] = eval_expr(env_, es->head);
+		valeurs_->v = (int*) realloc(valeurs_->v, size*sizeof(int));
+		valeurs_->v[i] = eval_expr(env_, p->head);
 		i++;
 		p = p->tail;
 	}
@@ -184,26 +184,36 @@ int eval_expr(env* env_, Sexpr expr){
 		case ASTApp:{
 				Sexpr e = expr->content.app.fun;
 				Sexprs es = expr->content.app.args;
-				printf("###\n");
-				print_env(env_);
-				printf("\n###\n");
-				printf("id => %s\n", getId(e));printf("###\n");
-				if ((get_closure(env_, getId(e))) != NULL) {printf("###ici1\n");
+				if ((get_closure(env_, getId(e))) != NULL) {
 					closure* closure_ = get_closure(env_, e->content.id);
 					valeurs* valeurs_ = exprs_to_valeurs(env_, es);
 					env* env_tmp = lier_args_vals_env(closure_->env_, closure_->ids_, valeurs_);
 					return eval_expr(env_tmp, closure_->corp);
-				} else if ((get_closure_rec(env_, getId(e))) != NULL) {printf("###ici2\n");
+				} else if ((get_closure_rec(env_, getId(e))) != NULL) {
 					closure_rec* closure_rec_ = get_closure_rec(env_, e->content.id);
 					valeurs* valeurs_ = exprs_to_valeurs(env_, es);
 					env* env_tmp = lier_args_vals_env(closure_rec_->env_, closure_rec_->ids_, valeurs_);				
 					env_tmp = ajout_closure_rec_env(env_tmp, closure_rec_);
 					return eval_expr(env_tmp, closure_rec_->corp);
+				} else if (tagOf(e) == ASTAbs){
+					closure* closure_ = malloc(sizeof(closure));
+					closure_->corp = e->content.abstract.expr;
+					closure_->ids_ = malloc(sizeof(ids));
+					closure_->ids_ = args_to_ids(e->content.abstract.arg_);
+					closure_->env_ = copy_env(env_);
+					
+					valeurs* valeurs_ = exprs_to_valeurs(env_, es);
+					env* env_tmp = lier_args_vals_env(closure_->env_, closure_->ids_, valeurs_);
+					return eval_expr(env_tmp, closure_->corp);	
 				} else {
-					return 5;
+					return -5;
 				} 
 				break;
 				}
+		case ASTAbs:{
+				return -10;
+				break;
+			}
 		default:
 				return -3;
     }	
@@ -313,6 +323,7 @@ void eval_prog(prog* prog_){
 			{
 					printf("###ici\n");
 					valeur = eval_expr(env_, prog_->cmds[i].expr);
+					printf("v => %d\n", valeur);
 					printf("###ici\n");
 					break;
 				}

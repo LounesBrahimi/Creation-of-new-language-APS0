@@ -48,6 +48,7 @@ struct _valeurs {
 	int size;
 };
 
+env* copy_env(env* env_);
 env* ajout_closure_rec_env(env* env_, closure_rec* closure_rec_);
 closure_rec* get_closure_rec(env* env_, char* id);
 env* lier_args_vals_env(env* env_, ids* ids_, valeurs* valeurs_);
