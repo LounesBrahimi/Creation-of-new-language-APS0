@@ -1,4 +1,6 @@
 [ 
-FUN REC f ((int -> bool) -> (int -> bool)) [y:bool,x:int, a: int] 5;
-ECHO 5 
+CONST y int 42;
+FUN f int [x:int] (sub x 7);
+CONST z int 10;
+ECHO y
 ]

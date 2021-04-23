@@ -1,4 +1,5 @@
 [
-	CONST a int 42;
-	ECHO a
+# Exemple de programme
+CONST a int 42;
+ECHO ([x:int](add x 3) a)
 ]
