@@ -32,6 +32,14 @@ Sexpr newASTBool(char* v) {
   return r;
 }
 
+def newDefVar(char* id, type type_){
+	def v = mallocDef;
+	v->tag = ASTVar;
+	v->content.defVar.id = id;
+	v->content.defVar.type_ = type_->content.typePrim;
+	return v;
+}
+
 def newDefConst(char* id_, type type_, Sexpr expr_){
 	def c = mallocDef;
 	c->tag = ASTConst;

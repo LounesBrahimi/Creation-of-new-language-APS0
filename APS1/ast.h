@@ -27,7 +27,7 @@ enum _tag {
 };
 
 enum _tag_def {
-  ASTConst, ASTFun, ASTRecFun
+  ASTConst, ASTFun, ASTRecFun, ASTVar
 };
 
 enum _tag_type {
@@ -75,6 +75,10 @@ struct _def{
 			arg  arg_;
 			Sexpr expr;
 		} defRecFun;
+		struct {
+			char* id;
+			char* type_;
+		} defVar;
 	} content;
 };
 
@@ -159,6 +163,7 @@ Sexpr newASTNot(Sexpr e);
 def newDefConst(char* id, type type_, Sexpr expr);
 def newDefFun(char* id, type type_, arg arg_,Sexpr expr);
 def newDefRecFun(char* id, type type_, arg arg_,Sexpr expr);
+def newDefVar(char* id, type type_);
 
 arg newDefArg(char* id, type type_);
 arg addArg(arg arg_1, arg arg_2);

@@ -77,6 +77,8 @@ idents [a-zA-Z][a-zA-Z0-9]*
 
 "not"  { return (NOT); }
 
+"VAR"  { return (VAR); }
+
 {nums}    {
             yylval.num=atoi(yytext);
             return(NUM);

@@ -1,1 +1,4 @@
-42
+[
+	VAR X int;
+	ECHO 5
+]

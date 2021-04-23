@@ -54,6 +54,7 @@ int yyerror (char *);
 %token       DIV
 %token       LT
 %token       NOT
+%token       VAR
 
 %union {
   int num;
@@ -95,6 +96,7 @@ def:
   CONST IDENT type expr		{ add_def_const_prog(prog_, newDefConst($2, $3, $4)); $$ = newDefConst($2, $3, $4); }
 | FUN IDENT type LSQBR args RSQBR expr { add_def_fun_prog(prog_, newDefFun($2, $3, $5, $7)); $$ = newDefFun($2, $3, $5, $7); }
 | FUN REC IDENT type LSQBR args RSQBR expr { add_def_rec_prog(prog_, newDefRecFun($3, $4, $6, $8)); $$ = newDefRecFun($3, $4, $6, $8); }
+| VAR IDENT type { $$ = newDefVar($2, $3); }
   ;
 
 args:
