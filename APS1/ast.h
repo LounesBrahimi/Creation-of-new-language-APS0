@@ -185,12 +185,14 @@ struct _cmd{
 		def def_const;
 		def def_fun;
 		def def_rec;
+		def def_var;
 };
 
 void add_expr_prog(prog* prog_ , Sexpr expr);
 void add_def_const_prog(prog* prog_ , def def_);
 void add_def_fun_prog(prog* prog_ , def def_);
 void add_def_rec_prog(prog* prog_ , def def_);
+void add_def_var_prog(prog* prog_ , def def_);
 
 #define mallocSexpr malloc(sizeof(struct _sexpr))
 #define mallocSexprs malloc(sizeof(struct _sexprs))

@@ -24,6 +24,12 @@ void printBoolean(char* x) {
   printf("boolean(%s)",x);
 }
 
+void printDefVar(def v){
+	printf("defVar("); 
+	printId(v->content.defVar.id);
+	printf(", type(%s))", v->content.defVar.type_);
+}
+
 void printDefConst(def c){
 	switch(c->content.defConst.expr->tag) {
 		case ASTNum : printf("defConst("); printId(c->content.defConst.id); printf(", type(%s), ", c->content.defConst.type_); printNum(c->content.defConst.expr->content.num);  printf(")"); break;
@@ -210,6 +216,8 @@ void print_prog(prog* prog_){
 			printDefFun(prog_->cmds[i].def_fun);
 		} else if(prog_->cmds[i].type_ == 4){
 			printDefRecFun(prog_->cmds[i].def_rec);
+		} else if(prog_->cmds[i].type_ == 5){
+			printDefVar(prog_->cmds[i].def_var);
 		}
 	}
 }

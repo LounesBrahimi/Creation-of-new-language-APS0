@@ -147,6 +147,14 @@ void add_expr_prog(prog* prog_ , Sexpr expr){
 	prog_->cmds[i].expr = expr;
 }
 
+void add_def_var_prog(prog* prog_ , def def_){
+	int i = prog_->size;
+	prog_->size++;
+	prog_->cmds = realloc(prog_->cmds, (prog_->size)*sizeof(cmd));
+	prog_->cmds[i].type_ = 5;
+	prog_->cmds[i].def_var = def_;
+}
+
 void add_def_const_prog(prog* prog_ , def def_){
 	int i = prog_->size;
 	prog_->size++;
