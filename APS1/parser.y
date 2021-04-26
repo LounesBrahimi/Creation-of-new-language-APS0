@@ -112,6 +112,7 @@ def:
 | FUN REC IDENT type LSQBR args RSQBR expr { $$ = newDefRecFun($3, $4, $6, $8); }
 | VAR IDENT type { $$ = newDefVar($2, $3); }
 | PROC IDENT LSQBR args RSQBR Block { $$ = newDefProc($2, $4, $6); }
+| PROC REC IDENT LSQBR args RSQBR Block { $$ = newDefRecProc($3, $5, $7); }
   ;
 
 args:

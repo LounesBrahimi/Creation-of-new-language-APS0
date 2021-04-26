@@ -17,3 +17,4 @@ void printDef(def);
 void printType(type);
 void print_prog(prog* prog_);
 void printDefProc(def p);
+void printDefRecProc(def p);

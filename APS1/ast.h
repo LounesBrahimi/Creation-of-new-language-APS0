@@ -27,7 +27,7 @@ enum _tag {
 };
 
 enum _tag_def {
-  ASTConst, ASTFun, ASTRecFun, ASTVar, ASTProc
+  ASTConst, ASTFun, ASTRecFun, ASTVar, ASTProc, ASTRecProc
 };
 
 enum _tag_type {
@@ -84,6 +84,11 @@ struct _def{
 			arg  arg_;
 			prog* block;
 		} defProc;
+		struct {
+			char* id;
+			arg  arg_;
+			prog* block;
+		} def_rec_proc;
 	} content;
 };
 
@@ -170,6 +175,7 @@ def newDefFun(char* id, type type_, arg arg_,Sexpr expr);
 def newDefRecFun(char* id, type type_, arg arg_,Sexpr expr);
 def newDefVar(char* id, type type_);
 def newDefProc(char* id, arg arg_, prog* block);
+def newDefRecProc(char* id, arg arg_, prog* block);
 
 arg newDefArg(char* id, type type_);
 arg addArg(arg arg_1, arg arg_2);
@@ -193,6 +199,7 @@ struct _cmd{
 		def def_rec;
 		def def_var;
 		def def_proc;
+		def def_rec_proc;
 		struct _cmd* block;
 };
 
@@ -202,6 +209,7 @@ void add_def_fun_prog(prog* prog_ , def def_);
 void add_def_rec_prog(prog* prog_ , def def_);
 void add_def_var_prog(prog* prog_ , def def_);
 void add_def_proc_prog(prog* prog_ , def def_);
+void add_def_rec_proc_prog(prog* prog_ , def def_);
 
 void add_def_block(prog* prog_ , def def_);
 

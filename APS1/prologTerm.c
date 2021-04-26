@@ -229,8 +229,20 @@ void printBlock(prog* block_){
 			printDefVar(block_->cmds[i].def_var);
 		} else if(block_->cmds[i].type_ == 6){
 			printDefProc(block_->cmds[i].def_proc);
+		} else if(block_->cmds[i].type_ == 7){
+			printDefRecProc(block_->cmds[i].def_rec_proc);
 		}
 	}
+	printf(")");
+}
+
+void printDefRecProc(def p){
+	printf("defRecProc(");
+	printId(p->content.def_rec_proc.id);
+	printf(", ");
+	printArgs(p->content.def_rec_proc.arg_);
+	printf(", ");
+	printBlock(p->content.def_rec_proc.block);
 	printf(")");
 }
 
@@ -266,8 +278,8 @@ void print_prog(prog* prog_){
 			printDefVar(prog_->cmds[i].def_var);
 		} else if(prog_->cmds[i].type_ == 6){
 			printDefProc(prog_->cmds[i].def_proc);
+		} else if(prog_->cmds[i].type_ == 7){
+			printDefRecProc(prog_->cmds[i].def_rec_proc);
 		}
 	}
 }
-
-

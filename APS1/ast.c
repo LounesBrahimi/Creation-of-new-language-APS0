@@ -51,6 +51,15 @@ def newDefConst(char* id_, type type_, Sexpr expr_){
 	return c;
 }
 
+def newDefRecProc(char* id, arg arg_, prog* block){
+	def p = mallocDef;
+	p->tag = ASTRecProc;
+	p->content.def_rec_proc.id = id;
+	p->content.def_rec_proc.arg_ = arg_;
+	p->content.def_rec_proc.block = block;
+	return p;
+}
+
 def newDefProc(char* id, arg arg_, prog* block){
 	def p = mallocDef;
 	p->tag = ASTProc;
@@ -163,6 +172,8 @@ void add_def_block(prog* prog_ , def def_){
 		add_def_var_prog(prog_, def_);
 	} else if (def_->tag == ASTProc){
 		add_def_proc_prog(prog_, def_);
+	} else if (def_->tag == ASTRecProc){
+		add_def_rec_proc_prog(prog_, def_);
 	}
 }
 
@@ -206,6 +217,21 @@ void add_def_const_prog(prog* prog_ , def def_){
 	cmd* tmp = malloc(sizeof(cmd));
 	tmp->type_ = 2;
 	tmp->def_const = def_;
+	tmp = realloc(tmp, (prog_->size)*sizeof(cmd));
+	int j;
+	for(j=1; j<prog_->size; j++){
+		tmp[j] = prog_->cmds[j-1];
+	}
+	prog_->cmds = tmp;
+	tmp = NULL;
+}
+
+void add_def_rec_proc_prog(prog* prog_ , def def_){
+	int i = prog_->size;
+	prog_->size++;
+	cmd* tmp = malloc(sizeof(cmd));
+	tmp->type_ = 7;
+	tmp->def_rec_proc = def_;
 	tmp = realloc(tmp, (prog_->size)*sizeof(cmd));
 	int j;
 	for(j=1; j<prog_->size; j++){
