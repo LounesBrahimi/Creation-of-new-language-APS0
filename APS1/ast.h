@@ -23,7 +23,7 @@ typedef enum _tag_type tag_type;
 
 enum _tag {
   ASTNum, ASTId, ASTApp, ASTBool, ASTAbs, ASTIf, ASTAnd, ASTOr, ASTAdd, ASTMul, ASTEq, ASTSub, ASTDiv,
-  ASTLt, ASTNot, ASTSet
+  ASTLt, ASTNot, ASTSet, ASTIfBlock, ASTWhile, ASTCall
 };
 
 enum _tag_def {
@@ -150,6 +150,19 @@ struct _sexpr {
 	  char* id;
 	  Sexpr e;
     } set;
+    struct {
+	  Sexpr condition;
+	  prog* block1;
+	  prog* block2;
+    } if_block;
+    struct {
+	  Sexpr condition;
+	  prog* block;
+    } while_;
+    struct {
+	  char* id;
+	  Sexpr expr;
+    } call_;
   } content;
 };
 
@@ -174,6 +187,9 @@ Sexpr newASTDiv(Sexpr e1, Sexpr e2);
 Sexpr newASTLt(Sexpr e1, Sexpr e2);
 Sexpr newASTNot(Sexpr e);
 Sexpr newSet(char* id, Sexpr e);
+Sexpr newIfBlock(Sexpr condition, prog* block1, prog* block2);
+Sexpr newWhile(Sexpr condition, prog* block);
+Sexpr newCall(char* id, Sexpr expr);
 
 def newDefConst(char* id, type type_, Sexpr expr);
 def newDefFun(char* id, type type_, arg arg_,Sexpr expr);

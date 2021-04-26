@@ -302,6 +302,31 @@ Sexpr newASTIf(Sexpr cond, Sexpr cons, Sexpr alt){
   return r;
 }
 
+Sexpr newCall(char* id, Sexpr expr){
+	Sexpr r = mallocSexpr;
+	r->tag = ASTCall;
+	r->content.call_.id = id;
+	r->content.call_.expr = expr;
+	return r;
+}
+
+Sexpr newWhile(Sexpr condition, prog* block){
+	Sexpr r = mallocSexpr;
+	r->tag = ASTWhile;
+	r->content.while_.condition = condition;
+	r->content.while_.block = block;
+	return r;
+}
+
+Sexpr newIfBlock(Sexpr condition, prog* block1, prog* block2){
+	Sexpr r = mallocSexpr;
+	r->tag = ASTIfBlock;
+	r->content.if_block.condition = condition;
+	r->content.if_block.block1 = block1;
+	r->content.if_block.block2 = block2;
+	return r;
+}
+
 Sexpr newSet(char* id, Sexpr e){
   Sexpr r = mallocSexpr;	
   r->tag = ASTSet; 

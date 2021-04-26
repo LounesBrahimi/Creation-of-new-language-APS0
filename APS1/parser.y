@@ -27,6 +27,8 @@ int yyerror (char *);
  def def_const;
  prog* prog_ = NULL;
  prog* cmds_ = NULL;
+ prog* block2_ = NULL;
+ prog* tmp_block = NULL;
 %}
 
 %token<str>  CONST
@@ -58,6 +60,9 @@ int yyerror (char *);
 %token       VAR
 %token       PROC
 %token       SET
+%token       IFB
+%token       WHILE
+%token       CALL
 
 %union {
   int num;
@@ -90,7 +95,11 @@ int yyerror (char *);
 prog: LSQBR cmds RSQBR   { theExpr = $2; }
   ;
 
-Block: LSQBR cmdsBlock RSQBR   { $$ = cmds_; }
+Block: LSQBR cmdsBlock RSQBR   { tmp_block = cmds_;
+								cmds_ = NULL;   
+								cmds_ = malloc(sizeof(prog));
+								cmds_->size = 0; 
+								$$ = tmp_block; }
   ;
 
 cmdsBlock :
@@ -106,7 +115,10 @@ cmds:
   ;
 
 stat: ECHO expr		   { $$ = $2; }
-| SET IDENT expr       { $$ = newSet($2, $3); $$ = newSet($2, $3);}
+| SET IDENT expr       { $$ = newSet($2, $3); }
+| IFB expr Block Block { $$ = newIfBlock($2, $3, $4); }
+| WHILE expr Block     { $$ = newWhile($2, $3); }
+| CALL IDENT expr      { $$ = newCall($2, $3); }
   ;
 
 def: 
@@ -179,6 +191,8 @@ int main(int argc, char **argv) {
   prog_->size = 0;
   cmds_ = malloc(sizeof(prog));
   cmds_->size = 0;
+  block2_ = malloc(sizeof(prog));
+  block2_->size = 0;
   yyparse();
   fclose(infile);
   printf("prog([");

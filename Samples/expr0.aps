@@ -1,4 +1,7 @@
 [
-  	SET x 21;
-	ECHO 5
+  PROC printBool [b:bool]
+    [
+      IF b [ECHO 1] [ECHO 0]
+    ];
+  CALL printBool true
 ]

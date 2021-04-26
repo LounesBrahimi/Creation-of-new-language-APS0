@@ -200,6 +200,32 @@ void printSexpr(Sexpr e) {
 	printf(")");	
 	break;
   }
+  case ASTIfBlock : {
+	printf("ifBlock(");
+	printSexpr(e->content.if_block.condition);
+	printf(", ");
+	printBlock(e->content.if_block.block1);			
+	printf(", ");
+	printBlock(e->content.if_block.block2);			
+	printf(")");	
+	break;
+  }
+  case ASTWhile : {
+	printf("while(");
+	printSexpr(e->content.while_.condition);
+	printf(", ");
+	printBlock(e->content.while_.block);					
+	printf(")");	
+	break;
+  }
+  case ASTCall : {
+	printf("call(");
+	printId(e->content.call_.id);
+	printf(", ");
+	printSexpr(e->content.call_.expr);					
+	printf(")");	
+	break;
+  }
   }
 }
 

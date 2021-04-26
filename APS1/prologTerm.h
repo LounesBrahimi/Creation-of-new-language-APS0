@@ -18,3 +18,4 @@ void printType(type);
 void print_prog(prog* prog_);
 void printDefProc(def p);
 void printDefRecProc(def p);
+void printBlock(prog* block_);

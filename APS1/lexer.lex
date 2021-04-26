@@ -83,6 +83,12 @@ idents [a-zA-Z][a-zA-Z0-9]*
 
 "SET"	{ return (SET); }
 
+"IF"	{ return (IFB); }
+
+"WHILE" { return (WHILE); }
+
+"CALL" { return(CALL); }
+
 {nums}    {
             yylval.num=atoi(yytext);
             return(NUM);
