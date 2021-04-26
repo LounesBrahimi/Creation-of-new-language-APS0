@@ -192,6 +192,14 @@ void printSexpr(Sexpr e) {
 	printf(")");	
 	break;
   }
+  case ASTSet : {
+	printf("set(");
+	printId(e->content.set.id);
+	printf(", ");
+	printSexpr(e->content.set.e);			
+	printf(")");	
+	break;
+  }
   }
 }
 

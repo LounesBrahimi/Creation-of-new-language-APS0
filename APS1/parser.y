@@ -57,6 +57,7 @@ int yyerror (char *);
 %token       NOT
 %token       VAR
 %token       PROC
+%token       SET
 
 %union {
   int num;
@@ -99,11 +100,13 @@ cmdsBlock :
   ;
 
 cmds: 
-  stat { add_expr_prog(prog_, $1); }
-| def SEMICOLON cmds      { add_def_block(prog_ , $1); $$ = $3; }  
+  stat                    { add_expr_prog(prog_, $1); }
+| def SEMICOLON cmds      { add_def_block(prog_ , $1); $$ = $3; } 
+| stat SEMICOLON cmds     { add_expr_prog(prog_, $1); } 
   ;
 
 stat: ECHO expr		   { $$ = $2; }
+| SET IDENT expr       { $$ = newSet($2, $3); $$ = newSet($2, $3);}
   ;
 
 def: 

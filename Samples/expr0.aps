@@ -1,4 +1,4 @@
 [
-        PROC REC addproc [x:int,y:int] [ ECHO 10 ];
+  	SET x 21;
 	ECHO 5
 ]

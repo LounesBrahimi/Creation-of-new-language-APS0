@@ -302,6 +302,14 @@ Sexpr newASTIf(Sexpr cond, Sexpr cons, Sexpr alt){
   return r;
 }
 
+Sexpr newSet(char* id, Sexpr e){
+  Sexpr r = mallocSexpr;	
+  r->tag = ASTSet; 
+  r->content.set.id = id;
+  r->content.set.e = e;
+  return r;
+}
+
 Sexpr newASTAnd(Sexpr e1, Sexpr e2){
   Sexpr r = mallocSexpr;	
   r->tag = ASTAnd; 
