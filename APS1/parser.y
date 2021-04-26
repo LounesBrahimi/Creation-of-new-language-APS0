@@ -26,6 +26,7 @@ int yyerror (char *);
  Sexpr theExpr;
  def def_const;
  prog* prog_ = NULL;
+ prog* cmds_ = NULL;
 %}
 
 %token<str>  CONST
@@ -55,6 +56,7 @@ int yyerror (char *);
 %token       LT
 %token       NOT
 %token       VAR
+%token       PROC
 
 %union {
   int num;
@@ -64,6 +66,7 @@ int yyerror (char *);
   def def_;
   arg arg_;
   type type_;
+  prog* block;
 }
 
 %type<expr> expr
@@ -77,6 +80,8 @@ int yyerror (char *);
 %type<arg_> args
 %type<expr> cmds
 %type<expr> stat
+%type<block> Block
+%type<block> cmdsBlock
 
 %start prog
 %%
@@ -84,19 +89,29 @@ int yyerror (char *);
 prog: LSQBR cmds RSQBR   { theExpr = $2; }
   ;
 
-cmds: 
-  stat
-| def SEMICOLON cmds      { $$ = $3; }  
+Block: LSQBR cmdsBlock RSQBR   { $$ = cmds_; }
   ;
 
-stat: ECHO expr		   { add_expr_prog(prog_, $2); $$ = $2; }
+cmdsBlock :
+  stat						   { add_expr_prog(cmds_, $1); $$ = cmds_; }
+| def SEMICOLON cmdsBlock      { add_def_block(cmds_, $1); $$ = cmds_;} 
+| stat SEMICOLON cmdsBlock     { add_expr_prog(cmds_, $1); $$ = cmds_; }
+  ;
+
+cmds: 
+  stat { add_expr_prog(prog_, $1); }
+| def SEMICOLON cmds      { add_def_block(prog_ , $1); $$ = $3; }  
+  ;
+
+stat: ECHO expr		   { $$ = $2; }
   ;
 
 def: 
-  CONST IDENT type expr		{ add_def_const_prog(prog_, newDefConst($2, $3, $4)); $$ = newDefConst($2, $3, $4); }
-| FUN IDENT type LSQBR args RSQBR expr { add_def_fun_prog(prog_, newDefFun($2, $3, $5, $7)); $$ = newDefFun($2, $3, $5, $7); }
-| FUN REC IDENT type LSQBR args RSQBR expr { add_def_rec_prog(prog_, newDefRecFun($3, $4, $6, $8)); $$ = newDefRecFun($3, $4, $6, $8); }
-| VAR IDENT type { add_def_var_prog(prog_, newDefVar($2, $3)); $$ = newDefVar($2, $3); }
+  CONST IDENT type expr		{ $$ = newDefConst($2, $3, $4); }
+| FUN IDENT type LSQBR args RSQBR expr { $$ = newDefFun($2, $3, $5, $7); }
+| FUN REC IDENT type LSQBR args RSQBR expr { $$ = newDefRecFun($3, $4, $6, $8); }
+| VAR IDENT type { $$ = newDefVar($2, $3); }
+| PROC IDENT LSQBR args RSQBR Block { $$ = newDefProc($2, $4, $6); }
   ;
 
 args:
@@ -158,6 +173,8 @@ int main(int argc, char **argv) {
   FILE* infile = freopen(argv[1], "r", stdin);
   prog_ = malloc(sizeof(prog));
   prog_->size = 0;
+  cmds_ = malloc(sizeof(prog));
+  cmds_->size = 0;
   yyparse();
   fclose(infile);
   printf("prog([");

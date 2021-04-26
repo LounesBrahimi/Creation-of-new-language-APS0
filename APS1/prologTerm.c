@@ -63,7 +63,15 @@ void printDefFun(def c){
 		case ASTId :  printf("Fun %s ",c->content.defFun.id); printType(c->content.defFun.type_); printArgs(c->content.defFun.arg_);	printf("%s",c->content.defFun.expr->content.id); break;
 		case ASTBool :printf("Fun %s ", c->content.defFun.id); printType(c->content.defFun.type_); printArgs(c->content.defFun.arg_); printf(" %s", c->content.defFun.expr->content.boolean); break;
 	}*/
-	printf("defFun("); printId(c->content.defFun.id);printf(", "); printType(c->content.defFun.type_); printf(", "); printArgs(c->content.defFun.arg_); printf(", "); printSexpr(c->content.defFun.expr); printf(")");
+	printf("defFun(");
+	printId(c->content.defFun.id);
+	printf(", "); 
+	printType(c->content.defFun.type_); 
+	printf(", "); 
+	printArgs(c->content.defFun.arg_);
+	printf(", ");
+	printSexpr(c->content.defFun.expr);
+	printf(")");
 }
 
 void printDefRecFun(def c){
@@ -198,6 +206,44 @@ void printSexprs(Sexprs es) {
   }
 }
 
+void printBlock(prog* block_){
+	int i;
+	printf("block(");
+	for(i=0; i<block_->size; i++){
+		if(i) printf(", ");
+		if(block_->cmds[i].type_ == 1){
+			//if(i == (block_->size-1)){
+				//printf("echo(");
+			//	printSexpr(block_->cmds[i].expr);
+				//printf(")");
+			//} else {
+				printSexpr(block_->cmds[i].expr);
+		//	}
+		} else if(block_->cmds[i].type_ == 2){
+			printDefConst(block_->cmds[i].def_const);
+		} else if(block_->cmds[i].type_ == 3){
+			printDefFun(block_->cmds[i].def_fun);
+		} else if(block_->cmds[i].type_ == 4){
+			printDefRecFun(block_->cmds[i].def_rec);
+		} else if(block_->cmds[i].type_ == 5){
+			printDefVar(block_->cmds[i].def_var);
+		} else if(block_->cmds[i].type_ == 6){
+			printDefProc(block_->cmds[i].def_proc);
+		}
+	}
+	printf(")");
+}
+
+void printDefProc(def p){
+	printf("defProc(");
+	printId(p->content.defProc.id);
+	printf(", ");
+	printArgs(p->content.defProc.arg_);
+	printf(", ");
+	printBlock(p->content.defProc.block);
+	printf(")");
+}
+
 void print_prog(prog* prog_){
 	int i;
 	for(i=0; i<prog_->size; i++){
@@ -218,6 +264,10 @@ void print_prog(prog* prog_){
 			printDefRecFun(prog_->cmds[i].def_rec);
 		} else if(prog_->cmds[i].type_ == 5){
 			printDefVar(prog_->cmds[i].def_var);
+		} else if(prog_->cmds[i].type_ == 6){
+			printDefProc(prog_->cmds[i].def_proc);
 		}
 	}
 }
+
+

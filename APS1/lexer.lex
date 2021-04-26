@@ -79,6 +79,8 @@ idents [a-zA-Z][a-zA-Z0-9]*
 
 "VAR"  { return (VAR); }
 
+"PROC"	{ return (PROC); }
+
 {nums}    {
             yylval.num=atoi(yytext);
             return(NUM);

@@ -1,4 +1,4 @@
 [
-	VAR X int;
+        PROC addproc [x:int,y:int] [ ECHO 10 ];
 	ECHO 5
 ]
