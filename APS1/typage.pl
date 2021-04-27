@@ -74,6 +74,9 @@ fun(G,(TYPE,[],EXPR)) :- expr(G,TYPE,EXPR).
 fun(G,(TYPE,[ARG|ARGS],EXPR)) :- fun([ARG|G],(TYPE,ARGS,EXPR)).
 
 %%decs
+decsRecProc(G, (X, ARGS, block(CMDS)), [(X, arrow(TYPES, void))|G]) :-
+	typeargs(ARGS, TYPES), append(ARGS, G, ARGSG),
+		cmds([(X, arrow(TYPES, void))|ARGSG], CMDS, void).
 decsProc(G, (X, ARGS, block(CMDS)), [(X, arrow(TYPES, void))|G]) :-
 	typeargs(ARGS, TYPES), append(ARGS, G, ARGSG),
 		cmds(ARGSG, CMDS, void).
@@ -83,6 +86,7 @@ decfunrec(G,(id(X),TYPE,ARGS,EXPR),[(X,arrow(TYPEARGS,TYPE))|G]) :- fun(G,(TYPE,
 decsVar(G,(id(X),T),[(X,T)|G]).
 
 %%cmds
+cmds(G, [defRecProc(id(X),args(ARGS),block(CMDS))|LCMDS], void) :- decsRecProc(G,(id(X),ARGS, block(CMDS)),NEWG) ,cmds(NEWG, LCMDS, void).
 cmds(G, [defProc(id(X),args(ARGS),block(CMDS))|LCMDS], void) :- decsProc(G,(id(X),ARGS, block(CMDS)),NEWG) ,cmds(NEWG, LCMDS, void).
 cmds(_, [], void).
 cmds(G, [defConst(id(X),type(T),EXPR)|LCMDS], void) :- decs(G,(id(X),T,EXPR),NEWG) ,cmds(NEWG, LCMDS, void).
