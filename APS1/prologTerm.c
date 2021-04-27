@@ -242,7 +242,7 @@ void printSexprs(Sexprs es) {
 
 void printBlock(prog* block_){
 	int i;
-	printf("block(");
+	printf("block([");
 	for(i=0; i<block_->size; i++){
 		if(i) printf(", ");
 		if(block_->cmds[i].type_ == 1){
@@ -267,7 +267,7 @@ void printBlock(prog* block_){
 			printDefRecProc(block_->cmds[i].def_rec_proc);
 		}
 	}
-	printf(")");
+	printf("])");
 }
 
 void printDefRecProc(def p){
