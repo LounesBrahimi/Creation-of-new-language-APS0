@@ -1,8 +1,7 @@
 [
-  VAR x int;
-  SET x 0;
-  WHILE (lt x 42) [
-    SET x (add x 1)
-  ];
-  ECHO x
+  PROC printBool [b:bool]
+    [
+      IF b [ECHO 1] [ECHO 0]
+    ];
+  ECHO 5
 ]
