@@ -1,7 +1,3 @@
 [
-  PROC REC printBool [b:bool]
-    [
-      IF b [ECHO 1] [ECHO 0]
-    ];
-  ECHO 5
-]
+FUN f int [x:int] (sub x 5);
+ECHO (f 255)]

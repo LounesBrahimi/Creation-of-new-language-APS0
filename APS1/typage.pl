@@ -74,10 +74,10 @@ fun(G,(TYPE,[],EXPR)) :- expr(G,TYPE,EXPR).
 fun(G,(TYPE,[ARG|ARGS],EXPR)) :- fun([ARG|G],(TYPE,ARGS,EXPR)).
 
 %%decs
-decsRecProc(G, (X, ARGS, block(CMDS)), [(X, arrow(TYPES, void))|G]) :-
+decsRecProc(G, (id(X), ARGS, block(CMDS)), [(X, arrow(TYPES, void))|G]) :-
 	typeargs(ARGS, TYPES), append(ARGS, G, ARGSG),
 		cmds([(X, arrow(TYPES, void))|ARGSG], CMDS, void).
-decsProc(G, (X, ARGS, block(CMDS)), [(X, arrow(TYPES, void))|G]) :-
+decsProc(G, (id(X), ARGS, block(CMDS)), [(X, arrow(TYPES, void))|G]) :-
 	typeargs(ARGS, TYPES), append(ARGS, G, ARGSG),
 		cmds(ARGSG, CMDS, void).
 decs(G, (id(X),TYPE,EXPR), [(X,TYPE)|G]):- expr(G, TYPE, EXPR).
@@ -99,6 +99,9 @@ cmds(G, [ifBlock(COND, block(CMDS1), block(CMDS2))|LCMDS],void) :- expr(G, bool,
 		cmds(G, CMDS2, void), cmds(G, LCMDS, void).
 cmds(G, [while(COND, block(CMDS))|LCMDS],void) :- expr(G, bool, COND), 
 		cmds(G, CMDS, void), cmds(G, LCMDS, void).
+cmds(G,[call(id(X), EXPRS)|LCMDS],void) :- 
+	typeaexprs(G, EXPRS, TYPES), assoc(X, G, arrow(TYPES, void)),
+	cmds(G, LCMDS, void).
 %%prog
 prog(LCMDS) :- cmds([], LCMDS, void).
 
