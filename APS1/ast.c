@@ -40,14 +40,52 @@ def newDefVar(char* id, type type_){
 	return v;
 }
 
+stat newIfBlock(Sexpr condition, prog* block1, prog* block2){
+	stat s = mallocStat;
+	s->tag = ASTIfBlock;
+	s->content.if_block.condition = condition;
+	s->content.if_block.block1 = block1;
+	s->content.if_block.block2 = block2;
+	return s;
+}
+
+stat newWhile(Sexpr condition, prog* block){
+	stat s = mallocStat;
+	s->tag = ASTWhile;
+	s->content.while_.condition = condition;
+	s->content.while_.block = block;
+	return s;
+}
+
+stat newEcho(Sexpr expr){
+	stat s = mallocStat;
+	s->tag = ASTEcho;
+	s->content.echo.expr = expr;
+	return s;
+}
+
+stat newCall(char* id, Sexpr expr){
+	stat s = mallocStat;
+	s->tag = ASTCall;
+	s->content.call_.id = id;
+	s->content.call_.expr = expr;
+	return s;
+}
+
+stat newSet(char* id, Sexpr e){
+	stat s = mallocStat;	
+	s->tag = ASTSet; 
+	s->content.set.id = id;
+	s->content.set.e = e;
+	return s;
+}
+
 def newDefConst(char* id_, type type_, Sexpr expr_){
 	def c = mallocDef;
 	c->tag = ASTConst;
 	c->content.defConst.id = id_;
 	c->content.defConst.type_ = type_->content.typePrim;
 	c->content.defConst.expr = expr_;
-	/*printDef(c);
-	printf("\n");*/
 	return c;
 }
 
@@ -211,6 +249,21 @@ void add_def_var_prog(prog* prog_ , def def_){
 	tmp = NULL;
 }
 
+void add_stat_prog(prog* prog_, stat stat_){
+	int i = prog_->size;
+	prog_->size++;
+	cmd* tmp = malloc(sizeof(cmd));
+	tmp->type_ = 8;
+	tmp->stat_ = stat_;
+	tmp = realloc(tmp, (prog_->size)*sizeof(cmd));
+	int j;
+	for(j=1; j<prog_->size; j++){
+		tmp[j] = prog_->cmds[j-1];
+	}
+	prog_->cmds = tmp;
+	tmp = NULL;
+}
+
 void add_def_const_prog(prog* prog_ , def def_){
 	int i = prog_->size;
 	prog_->size++;
@@ -299,39 +352,6 @@ Sexpr newASTIf(Sexpr cond, Sexpr cons, Sexpr alt){
   r->content.if_.cond = cond;	
   r->content.if_.cons = cons;
   r->content.if_.alt = alt;
-  return r;
-}
-
-Sexpr newCall(char* id, Sexpr expr){
-	Sexpr r = mallocSexpr;
-	r->tag = ASTCall;
-	r->content.call_.id = id;
-	r->content.call_.expr = expr;
-	return r;
-}
-
-Sexpr newWhile(Sexpr condition, prog* block){
-	Sexpr r = mallocSexpr;
-	r->tag = ASTWhile;
-	r->content.while_.condition = condition;
-	r->content.while_.block = block;
-	return r;
-}
-
-Sexpr newIfBlock(Sexpr condition, prog* block1, prog* block2){
-	Sexpr r = mallocSexpr;
-	r->tag = ASTIfBlock;
-	r->content.if_block.condition = condition;
-	r->content.if_block.block1 = block1;
-	r->content.if_block.block2 = block2;
-	return r;
-}
-
-Sexpr newSet(char* id, Sexpr e){
-  Sexpr r = mallocSexpr;	
-  r->tag = ASTSet; 
-  r->content.set.id = id;
-  r->content.set.e = e;
   return r;
 }
 

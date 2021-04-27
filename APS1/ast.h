@@ -20,14 +20,20 @@ typedef struct _cmd cmd;
 typedef enum _tag Tag;
 typedef enum _tag_def Tag_def;
 typedef enum _tag_type tag_type;
+typedef enum _Tag_stat tag_stat;
+typedef struct _stat* stat;
 
 enum _tag {
   ASTNum, ASTId, ASTApp, ASTBool, ASTAbs, ASTIf, ASTAnd, ASTOr, ASTAdd, ASTMul, ASTEq, ASTSub, ASTDiv,
-  ASTLt, ASTNot, ASTSet, ASTIfBlock, ASTWhile, ASTCall
+  ASTLt, ASTNot
 };
 
 enum _tag_def {
   ASTConst, ASTFun, ASTRecFun, ASTVar, ASTProc, ASTRecProc
+};
+
+enum _Tag_stat {
+	ASTEcho, ASTSet, ASTIfBlock, ASTCall, ASTWhile
 };
 
 enum _tag_type {
@@ -53,6 +59,39 @@ struct _arg{
 	char* id;
 	char* type_;
 	struct _arg* suivant;
+};
+
+stat newEcho(Sexpr expr);
+stat newSet(char* id, Sexpr e);
+stat newIfBlock(Sexpr condition, prog* block1, prog* block2);
+stat newWhile(Sexpr condition, prog* block);
+stat newCall(char* id, Sexpr expr);
+void add_stat_prog(prog* prog_, stat stat_);
+
+struct _stat{
+	tag_stat tag;
+	union{
+		struct {
+			Sexpr expr;
+		} echo;
+		struct {
+			char* id;
+			Sexpr e;
+		} set;
+		struct {
+			Sexpr condition;
+			prog* block1;
+			prog* block2;
+		} if_block;
+	    struct {
+			Sexpr condition;
+			prog* block;
+		} while_;
+	    struct {
+			char* id;
+			Sexpr expr;
+		} call_;
+	} content;
 };
 
 struct _def{
@@ -146,23 +185,6 @@ struct _sexpr {
     struct {
 	  Sexpr e;
     } not_;
-    struct {
-	  char* id;
-	  Sexpr e;
-    } set;
-    struct {
-	  Sexpr condition;
-	  prog* block1;
-	  prog* block2;
-    } if_block;
-    struct {
-	  Sexpr condition;
-	  prog* block;
-    } while_;
-    struct {
-	  char* id;
-	  Sexpr expr;
-    } call_;
   } content;
 };
 
@@ -186,10 +208,6 @@ Sexpr newASTSub(Sexpr e1, Sexpr e2);
 Sexpr newASTDiv(Sexpr e1, Sexpr e2);
 Sexpr newASTLt(Sexpr e1, Sexpr e2);
 Sexpr newASTNot(Sexpr e);
-Sexpr newSet(char* id, Sexpr e);
-Sexpr newIfBlock(Sexpr condition, prog* block1, prog* block2);
-Sexpr newWhile(Sexpr condition, prog* block);
-Sexpr newCall(char* id, Sexpr expr);
 
 def newDefConst(char* id, type type_, Sexpr expr);
 def newDefFun(char* id, type type_, arg arg_,Sexpr expr);
@@ -221,6 +239,7 @@ struct _cmd{
 		def def_var;
 		def def_proc;
 		def def_rec_proc;
+		stat stat_;
 		struct _cmd* block;
 };
 
@@ -237,6 +256,7 @@ void add_def_block(prog* prog_ , def def_);
 #define mallocSexpr malloc(sizeof(struct _sexpr))
 #define mallocSexprs malloc(sizeof(struct _sexprs))
 #define mallocDef malloc(sizeof(struct _def))
+#define mallocStat malloc(sizeof(struct _stat))
 #define mallocArg malloc(sizeof(struct _arg))
 #define mallocType malloc(sizeof(struct _type))
 #define tagOf(r) r->tag

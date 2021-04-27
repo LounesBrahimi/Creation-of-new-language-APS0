@@ -192,40 +192,6 @@ void printSexpr(Sexpr e) {
 	printf(")");	
 	break;
   }
-  case ASTSet : {
-	printf("set(");
-	printId(e->content.set.id);
-	printf(", ");
-	printSexpr(e->content.set.e);			
-	printf(")");	
-	break;
-  }
-  case ASTIfBlock : {
-	printf("ifBlock(");
-	printSexpr(e->content.if_block.condition);
-	printf(", ");
-	printBlock(e->content.if_block.block1);			
-	printf(", ");
-	printBlock(e->content.if_block.block2);			
-	printf(")");	
-	break;
-  }
-  case ASTWhile : {
-	printf("while(");
-	printSexpr(e->content.while_.condition);
-	printf(", ");
-	printBlock(e->content.while_.block);					
-	printf(")");	
-	break;
-  }
-  case ASTCall : {
-	printf("call(");
-	printId(e->content.call_.id);
-	printf(", ");
-	printSexpr(e->content.call_.expr);					
-	printf(")");	
-	break;
-  }
   }
 }
 
@@ -265,6 +231,8 @@ void printBlock(prog* block_){
 			printDefProc(block_->cmds[i].def_proc);
 		} else if(block_->cmds[i].type_ == 7){
 			printDefRecProc(block_->cmds[i].def_rec_proc);
+		} else if(block_->cmds[i].type_ == 8){
+			printStat(block_->cmds[i].stat_);
 		}
 	}
 	printf("])");
@@ -290,18 +258,72 @@ void printDefProc(def p){
 	printf(")");
 }
 
+void printEcho(stat stat_){
+	printf("echo(");
+	printSexpr(stat_->content.echo.expr);
+	printf(")");
+}
+
+void printIfBlock(stat stat_){
+	printf("ifBlock(");
+	printSexpr(stat_->content.if_block.condition);
+	printf(", ");
+	printBlock(stat_->content.if_block.block1);			
+	printf(", ");
+	printBlock(stat_->content.if_block.block2);			
+	printf(")");	
+}
+
+void printSet(stat stat_){
+	printf("set(");
+	printId(stat_->content.set.id);
+	printf(", ");
+	printSexpr(stat_->content.set.e);			
+	printf(")");	
+}
+
+void printWhile(stat stat_){
+	printf("while(");
+	printSexpr(stat_->content.while_.condition);
+	printf(", ");
+	printBlock(stat_->content.while_.block);					
+	printf(")");	
+}
+
+void printCall(stat stat_){
+	printf("call(");
+	printId(stat_->content.call_.id);
+	printf(", [");
+	printSexpr(stat_->content.call_.expr);					
+	printf("])");	
+}
+
+void printStat(stat stat_){
+	if (stat_->tag == ASTEcho){
+		printEcho(stat_);
+	} else if (stat_->tag == ASTSet){
+		printSet(stat_);
+	} else if (stat_->tag == ASTIfBlock){
+		printIfBlock(stat_);
+	} else if (stat_->tag == ASTWhile){
+		printWhile(stat_);
+	} else if (stat_->tag == ASTCall){
+		printCall(stat_);
+	}
+}
+
 void print_prog(prog* prog_){
 	int i;
 	for(i=0; i<prog_->size; i++){
 		if(i) printf(", ");
 		if(prog_->cmds[i].type_ == 1){
-			if(i == (prog_->size-1)){
-				printf("echo(");
+			//if(i == (prog_->size-1)){
+				//printf("echo(");
+			//	printSexpr(prog_->cmds[i].expr);
+		//		printf(")");
+			//} else {
 				printSexpr(prog_->cmds[i].expr);
-				printf(")");
-			} else {
-				printSexpr(prog_->cmds[i].expr);
-			}
+		//	}
 		} else if(prog_->cmds[i].type_ == 2){
 			printDefConst(prog_->cmds[i].def_const);
 		} else if(prog_->cmds[i].type_ == 3){
@@ -314,6 +336,8 @@ void print_prog(prog* prog_){
 			printDefProc(prog_->cmds[i].def_proc);
 		} else if(prog_->cmds[i].type_ == 7){
 			printDefRecProc(prog_->cmds[i].def_rec_proc);
+		} else if(prog_->cmds[i].type_ == 8){
+			printStat(prog_->cmds[i].stat_);
 		}
 	}
 }

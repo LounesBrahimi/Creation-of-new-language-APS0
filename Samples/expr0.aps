@@ -1,3 +1,15 @@
 [
-FUN f int [x:int] (sub x 5);
-ECHO (f 255)]
+  VAR x int;
+  PROC REC incr [n:int]
+    [
+      IF (lt x 42)
+        [
+	  SET x (add x n);
+	  CALL incr n
+	]
+	[ ECHO x ]
+    ];
+  SET x 21;
+  ECHO x;
+  CALL incr 1
+]

@@ -73,6 +73,7 @@ int yyerror (char *);
   arg arg_;
   type type_;
   prog* block;
+  stat stat_;
 }
 
 %type<expr> expr
@@ -85,7 +86,7 @@ int yyerror (char *);
 %type<arg_> arg
 %type<arg_> args
 %type<expr> cmds
-%type<expr> stat
+%type<stat_> stat
 %type<block> Block
 %type<block> cmdsBlock
 
@@ -103,18 +104,18 @@ Block: LSQBR cmdsBlock RSQBR   { tmp_block = cmds_;
   ;
 
 cmdsBlock :
-  stat						   { add_expr_prog(cmds_, $1); $$ = cmds_; }
+  stat						   { add_stat_prog(cmds_, $1); $$ = cmds_; }
 | def SEMICOLON cmdsBlock      { add_def_block(cmds_, $1); $$ = cmds_;} 
-| stat SEMICOLON cmdsBlock     { add_expr_prog(cmds_, $1); $$ = cmds_; }
+| stat SEMICOLON cmdsBlock     { add_stat_prog(cmds_, $1); $$ = cmds_; }
   ;
 
 cmds: 
-  stat                    { add_expr_prog(prog_, $1); }
+  stat                    { add_stat_prog(prog_, $1); }
 | def SEMICOLON cmds      { add_def_block(prog_ , $1); $$ = $3; } 
-| stat SEMICOLON cmds     { add_expr_prog(prog_, $1); } 
+| stat SEMICOLON cmds     { add_stat_prog(prog_, $1); } 
   ;
 
-stat: ECHO expr		   { $$ = $2; }
+stat: ECHO expr		   { $$ = newEcho($2); }
 | SET IDENT expr       { $$ = newSet($2, $3); }
 | IFB expr Block Block { $$ = newIfBlock($2, $3, $4); }
 | WHILE expr Block     { $$ = newWhile($2, $3); }
