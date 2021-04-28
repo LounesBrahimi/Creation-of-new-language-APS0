@@ -46,6 +46,20 @@ int cherche_id_env(env* env_, char* id){
 	return -2;
 }
 
+int indice_id_env(env* env_, char* id){
+	env* p = env_;
+	int i = 0;
+	while(p != NULL){
+		if (!(strcmp(p->id, id))){
+			return i;
+		}
+		else {
+			p = p->suite;
+		}
+	}
+	return -2;
+}
+
 closure* get_closure(env* env_, char* id){
 	env* p = env_;
 	while(p != NULL){
@@ -257,7 +271,8 @@ env* copy_env(env* env_){
 	return copy;
 }
 
-int eval_expr(env* env, int* mem, Sexpr expr){
+int eval_expr(env* env_, int* mem, Sexpr expr){
+	int indice = -9999;
 	switch (expr->tag) {
 		case ASTNum:
 				return expr->content.num;
@@ -266,10 +281,12 @@ int eval_expr(env* env, int* mem, Sexpr expr){
 				if (!(strcmp(expr->content.boolean, "true"))) return 1;
 					else return 0;
 				break;
-		/*case ASTId:
-				return cherche_id_env(env_, expr->content.id);
+		case ASTId:
+				indice = indice_id_env(env_, expr->content.id);
+				if (env_[indice].tag == ASTConst) 
+					return env_[indice].content.valeur;
 				break;
-		case ASTNot:
+		/*case ASTNot:
 				if (eval_expr(env_, expr->content.not_.e))
 					return 0;
 				else return 1;

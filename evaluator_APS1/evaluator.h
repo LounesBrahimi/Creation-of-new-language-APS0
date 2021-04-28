@@ -59,6 +59,8 @@ ids* args_to_ids(arg arg_);
 env* eval_def_fun(def def_fun, env* env_);
 void print_env(env* env_);
 int cherche_id_env(env* env_, char* id);
-int eval_expr(env* env, int* mem, Sexpr expr);
+int eval_expr(env* env_, int* mem, Sexpr expr);
 env* eval_def_const(def def_const, env* env_, int* mem);
 void eval_prog(prog* prog_);
+// retourne l'indice de l'id dans l'environnement
+int indice_id_env(env* env_, char* id);
