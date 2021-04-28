@@ -36,14 +36,14 @@ ids* args_to_ids(arg arg_){
 int cherche_id_env(env* env_, char* id){
 	env* p = env_;
 	while(p != NULL){
-		if (!(strcmp(p->id, id))){
+		if ((!(strcmp(p->id, id))) && (!(p->adresse))){
 			return p->content.valeur;
 		}
 		else {
 			p = p->suite;
 		}
 	}
-	return -2;
+	return -99999996;
 }
 
 int indice_id_env(env* env_, char* id){
@@ -199,6 +199,30 @@ void print_env(env* env_){
 	}
 }
 
+int cherche_id_adr_env(env* env_, char* id){
+	env* p = env_;
+	while(p != NULL){
+		if ((!(strcmp(p->id, id))) && (p->adresse)){
+			return p->content.valeur;
+		}
+		else {
+			p = p->suite;
+		}
+	}
+	return -99999997;
+}
+
+mem* affectation_mem(mem* mem_, int adresse, int valeur){
+	mem_->content[adresse].valeure = valeur;
+	return mem_;
+}
+
+mem* stat_set(env* env_, mem* mem_, stat stat_){
+	int adresse = cherche_id_adr_env(env_, stat_->content.set.id);
+	int valeur = eval_expr(env_, mem_, stat_->content.set.e);
+	return affectation_mem(mem_, adresse, valeur);
+}
+
 void eval_prog(prog* prog_){
 	env* env_ = NULL;
 	mem* mem_ = NULL;
@@ -235,6 +259,8 @@ void eval_prog(prog* prog_){
 					if (prog_->cmds[i].stat_->tag == ASTEcho){
 						valeur = eval_expr(env_, mem_, prog_->cmds[i].stat_->content.echo.expr);
 						printf("v => %d\n", valeur);
+					} else if (prog_->cmds[i].stat_->tag == ASTSet){
+						mem_ = stat_set(env_, mem_, prog_->cmds[i].stat_);
 					}
 					break;
 			default:
@@ -290,7 +316,6 @@ mem* alloc(mem* mem_){
 	}
 }
 
-
 env* copy_env(env* env_){
 	env* p = env_;
 	env* copy = malloc(sizeof(env));
@@ -298,6 +323,7 @@ env* copy_env(env* env_){
 	while (p != NULL) { 
 		p_copy->id = p->id;
 		p_copy->tag = p->tag;
+		p_copy->adresse = p->adresse;
 		if (p_copy->tag == ASTConst){
 			p_copy->content.valeur = p->content.valeur;
 		} else if (p_copy->tag == ASTFun){
@@ -318,6 +344,7 @@ env* copy_env(env* env_){
 
 int eval_expr(env* env_, mem* mem_, Sexpr expr){
 	int indice = -9999;
+	int valeur = -9999;
 	switch (expr->tag) {
 		case ASTNum:
 				return expr->content.num;
@@ -327,12 +354,16 @@ int eval_expr(env* env_, mem* mem_, Sexpr expr){
 					else return 0;
 				break;
 		case ASTId:
-				//indice = indice_id_env(env_, expr->content.id);
-				//printf("######%d######\n", indice_id_env(env_, expr->content.id));
-				//printf("******%d######\n", env_->content.valeur);
-				return cherche_id_env(env_, expr->content.id);
-				//if (env_[indice].tag == ASTConst) 
-					//return env_[indice].content.valeur;
+				valeur = cherche_id_env(env_, expr->content.id);
+				if (!(valeur == -99999996)){
+					return valeur;
+				} else {
+					valeur = cherche_id_adr_env(env_, expr->content.id);
+					if (!(valeur == -99999997)){
+						return mem_->content[valeur].valeure;
+					}
+				}
+				//return  cherche_id_env(env_, expr->content.id);
 				break;
 		case ASTNot:
 				if (eval_expr(env_, mem_, expr->content.not_.e))

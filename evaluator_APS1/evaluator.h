@@ -82,3 +82,8 @@ void eval_prog(prog* prog_);
 // retourne l'indice de l'id dans l'environnement
 int indice_id_env(env* env_, char* id);
 mem* alloc(mem* mem_);
+// retourne l'adresse de l'id dans l'environnement si il existe
+int cherche_id_adr_env(env* env_, char* id);
+mem* stat_set(env* env_, mem* mem_, stat stat_);
+// affecte la valeur à l'adresse indiqué dans la memoire
+mem* affectation_mem(mem* mem_, int adresse, int valeur);
