@@ -282,6 +282,8 @@ int eval_expr(env* env_, int* mem, Sexpr expr){
 				break;
 		case ASTId:
 				//indice = indice_id_env(env_, expr->content.id);
+				//printf("######%d######\n", indice_id_env(env_, expr->content.id));
+				//printf("******%d######\n", env_->content.valeur);
 				return cherche_id_env(env_, expr->content.id);
 				//if (env_[indice].tag == ASTConst) 
 					//return env_[indice].content.valeur;
@@ -344,17 +346,17 @@ int eval_expr(env* env_, int* mem, Sexpr expr){
 					env* env_tmp = lier_args_vals_env(closure_rec_->env_, closure_rec_->ids_, valeurs_);				
 					env_tmp = ajout_closure_rec_env(env_tmp, closure_rec_);
 					return eval_expr(env_tmp, mem, closure_rec_->corp);
-				}/* else if (tagOf(e) == ASTAbs){
+				} else if (tagOf(e) == ASTAbs){
 					closure* closure_ = malloc(sizeof(closure));
 					closure_->corp = e->content.abstract.expr;
 					closure_->ids_ = malloc(sizeof(ids));
 					closure_->ids_ = args_to_ids(e->content.abstract.arg_);
 					closure_->env_ = copy_env(env_);
 					
-					valeurs* valeurs_ = exprs_to_valeurs(env_, es);
+					valeurs* valeurs_ = exprs_to_valeurs(env_, es, mem);
 					env* env_tmp = lier_args_vals_env(closure_->env_, closure_->ids_, valeurs_);
-					return eval_expr(env_tmp, closure_->corp);	
-				} */else {
+					return eval_expr(env_tmp, mem, closure_->corp);	
+				} else {
 					return -5;
 				} 
 				break;
