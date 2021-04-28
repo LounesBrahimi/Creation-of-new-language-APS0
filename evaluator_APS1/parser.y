@@ -118,7 +118,7 @@ stat: ECHO expr		   { $$ = newEcho($2); }
 | SET IDENT expr       { $$ = newSet($2, $3); }
 | IFB expr Block Block { $$ = newIfBlock($2, $3, $4); }
 | WHILE expr Block     { $$ = newWhile($2, $3); }
-| CALL IDENT expr      { $$ = newCall($2, $3); }
+| CALL IDENT exprs      { $$ = newCall($2, $3); }
   ;
 
 def: 

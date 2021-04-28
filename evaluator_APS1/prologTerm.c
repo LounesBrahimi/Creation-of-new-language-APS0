@@ -292,7 +292,7 @@ void printCall(stat stat_){
 	printf("call(");
 	printId(stat_->content.call_.id);
 	printf(", [");
-	printSexpr(stat_->content.call_.expr);					
+	printSexprs(stat_->content.call_.expr);					
 	printf("])");	
 }
 

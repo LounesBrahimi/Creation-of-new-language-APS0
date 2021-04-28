@@ -65,7 +65,7 @@ stat newEcho(Sexpr expr);
 stat newSet(char* id, Sexpr e);
 stat newIfBlock(Sexpr condition, prog* block1, prog* block2);
 stat newWhile(Sexpr condition, prog* block);
-stat newCall(char* id, Sexpr expr);
+stat newCall(char* id, Sexprs  expr);
 void add_stat_prog(prog* prog_, stat stat_);
 
 struct _stat{
@@ -89,7 +89,7 @@ struct _stat{
 		} while_;
 	    struct {
 			char* id;
-			Sexpr expr;
+			Sexprs expr;
 		} call_;
 	} content;
 };

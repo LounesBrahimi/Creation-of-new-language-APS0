@@ -60,6 +60,22 @@ int indice_id_env(env* env_, char* id){
 	return -2;
 }
 
+closure_proc* get_closure_proc(env* env_, char* id){
+	env* p = env_;
+	while(p != NULL){
+		if (!(strcmp(p->id, id))){
+			if (p->tag == ASTProc)
+				return p->content.def_proc.closure_proc_;
+			else 
+				p = p->suite;
+		}
+		else {
+			p = p->suite;
+		}
+	}
+	return NULL;
+}
+
 closure* get_closure(env* env_, char* id){
 	env* p = env_;
 	while(p != NULL){
@@ -265,6 +281,18 @@ mem* stat_set(env* env_, mem* mem_, stat stat_){
 	return affectation_mem(mem_, adresse, valeur);
 }
 
+mem* stat_call(env* env_, mem** mem_, stat stat_){
+	Sexprs es = stat_->content.call_.expr;
+		if (get_closure_proc(env_, stat_->content.call_.id) != NULL) {
+			closure_proc* closure_proc_ = get_closure_proc(env_, stat_->content.call_.id);
+			valeurs* valeurs_ = exprs_to_valeurs(env_, es, *mem_);
+			env* env_tmp = lier_args_vals_env(closure_proc_->env_, closure_proc_->ids_, valeurs_);
+			eval_prog(env_tmp, *mem_, closure_proc_->block);
+		}
+	return *mem_;
+		printf("---------------fin call ---------------\n");
+}
+
 mem* stat_while(env* env_, mem** mem_, stat stat_){
 	int taille = -1;
 	if (eval_expr(env_, *mem_,  stat_->content.while_.condition)){
@@ -350,14 +378,18 @@ void eval_prog(env* env__, mem* mem__, prog* prog_){
 					break;
 			case 8 : 
 					if (prog_->cmds[i].stat_->tag == ASTEcho){
+						printf("#echo#\n");
 						valeur = eval_expr(env_, mem_, prog_->cmds[i].stat_->content.echo.expr);
 						printf("v => %d\n", valeur);
 					} else if (prog_->cmds[i].stat_->tag == ASTSet){
 						mem_ = stat_set(env_, mem_, prog_->cmds[i].stat_);
+						//printf("test : => ");printf("%d\n", mem_->content[0].valeure);
 					} else if (prog_->cmds[i].stat_->tag == ASTIfBlock){
 						mem_ = stat_IF(env_, &mem_, prog_->cmds[i].stat_);
 					} else if (prog_->cmds[i].stat_->tag == ASTWhile){
 						mem_ = stat_while(env_, &mem_, prog_->cmds[i].stat_);
+					} else if (prog_->cmds[i].stat_->tag == ASTCall){
+						mem_ = stat_call(env_, &mem_, prog_->cmds[i].stat_);
 					}
 					break;
 			default:
@@ -425,6 +457,10 @@ env* copy_env(env* env_){
 			p_copy->content.valeur = p->content.valeur;
 		} else if (p_copy->tag == ASTFun){
 			p_copy->content.def_fun.closure_ = p->content.def_fun.closure_;
+		} else if (p_copy->tag == ASTProc){
+			p_copy->content.def_proc.closure_proc_ = p->content.def_proc.closure_proc_;
+		} else if (p_copy->tag == ASTVar){
+			p_copy->content.valeur = p->content.valeur;
 		} else {
 			p_copy = NULL;
 		}
@@ -451,12 +487,13 @@ int eval_expr(env* env_, mem* mem_, Sexpr expr){
 					else return 0;
 				break;
 		case ASTId:
+				printf("recherche de Z\n");
 				valeur = cherche_id_env(env_, expr->content.id);
-				if (!(valeur == -99999996)){
+				if (!(valeur == -99999996)){printf("####\n");
 					return valeur;
 				} else {
 					valeur = cherche_id_adr_env(env_, expr->content.id);
-					if (!(valeur == -99999997)){
+					if (!(valeur == -99999997)){printf("***** : %d\n", valeur);
 						return mem_->content[valeur].valeure;
 					}
 				}

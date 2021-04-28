@@ -112,3 +112,4 @@ mem* affectation_mem(mem* mem_, int adresse, int valeur);
 mem* stat_IF(env* env_, mem** mem_, stat stat_);
 mem* stat_while(env* env_, mem** mem_, stat stat_);
 env* eval_def_proc_rec(def def_rec_proc, env* env_, mem* mem_);
+mem* stat_call(env* env_, mem** mem_, stat stat_);

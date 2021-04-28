@@ -64,7 +64,7 @@ stat newEcho(Sexpr expr){
 	return s;
 }
 
-stat newCall(char* id, Sexpr expr){
+stat newCall(char* id, Sexprs  expr){
 	stat s = mallocStat;
 	s->tag = ASTCall;
 	s->content.call_.id = id;
