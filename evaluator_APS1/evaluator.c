@@ -77,7 +77,7 @@ closure_rec* get_closure_rec(env* env_, char* id){
 	}
 	return NULL;
 }
-
+/*
 valeurs* exprs_to_valeurs(env* env_, Sexprs es){
 	Sexprs p = es; 
 	valeurs* valeurs_ = malloc(sizeof(valeurs));
@@ -94,7 +94,7 @@ valeurs* exprs_to_valeurs(env* env_, Sexprs es){
 	valeurs_->size = size;
 	return valeurs_;	
 }
-
+*/
 env* lier_args_vals_env(env* env_, ids* ids_, valeurs* valeurs_){
 	env* new_env = NULL;
 	env* p = NULL;
@@ -125,7 +125,139 @@ env* ajout_closure_rec_env(env* env_, closure_rec* closure_rec_){
 	return new_env;
 }
 
-int eval_expr(env* env_, Sexpr expr){
+/*
+env* eval_def_fun(def def_fun, env* env_){
+	env* new_env = malloc(sizeof(env));
+	new_env->id = def_fun->content.defFun.id;
+	new_env->tag = ASTFun;
+	new_env->content.def_fun.closure_ = malloc(sizeof(closure));
+	new_env->content.def_fun.closure_->corp = def_fun->content.defFun.expr;
+	new_env->content.def_fun.closure_->ids_ = malloc(sizeof(ids));
+	new_env->content.def_fun.closure_->ids_ = args_to_ids(def_fun->content.defFun.arg_);
+	new_env->content.def_fun.closure_->env_ = copy_env(env_);
+	new_env->suite = env_;
+	return new_env;
+}
+
+env* eval_def_rec(def def_rec, env* env_){
+	env* new_env = malloc(sizeof(env));
+	new_env->id = def_rec->content.defRecFun.id;
+	new_env->tag = ASTRecFun;
+	new_env->content.def_rec.closure_rec_ = malloc(sizeof(closure_rec));
+	new_env->content.def_rec.closure_rec_->corp = def_rec->content.defRecFun.expr;
+	new_env->content.def_rec.closure_rec_->ids_ = malloc(sizeof(ids));
+	new_env->content.def_rec.closure_rec_->ids_ = args_to_ids(def_rec->content.defRecFun.arg_);
+	new_env->content.def_rec.closure_rec_->env_ = copy_env(env_);
+	new_env->content.def_rec.closure_rec_->id = def_rec->content.defRecFun.id;
+	new_env->suite = env_;
+	return new_env;
+}
+*/
+void print_env(env* env_){
+	env* p = env_;
+	while(p != NULL){
+		printf("=========\n");
+		printf("id : %s\n", p->id);
+		if (p->tag == ASTConst)
+			printf("v : %d\n", p->content.valeur);
+		else if (p->tag == ASTFun) {
+			printf("closure : \n");
+			printf("expr : ");printSexpr(p->content.def_fun.closure_->corp);printf("\n");
+			printf("args : ");printIds(p->content.def_fun.closure_->ids_);printf("\n");
+			printf("env : ");print_env(p->content.def_fun.closure_->env_);printf("\n");
+		}
+		else if (p->tag == ASTRecFun) {
+			printf("closure_rec : \n");
+			printf("id : %s\n", p->content.def_rec.closure_rec_->id);
+			printf("expr : ");printSexpr(p->content.def_rec.closure_rec_->corp);printf("\n");
+			printf("args : ");printIds(p->content.def_rec.closure_rec_->ids_);printf("\n");
+			printf("env : ");print_env(p->content.def_rec.closure_rec_->env_);printf("\n");
+		}
+		p = p->suite;
+	}
+}
+
+void eval_prog(prog* prog_){
+	env* env_ = NULL;
+	int* mem = NULL;
+	int valeur = -404;
+	int size = prog_->size;
+	int i = 0;
+	printf("###prog####\n");
+	printf("#1 : expr\n");
+	printf("#2 : def_const\n");
+	printf("size : %d\n\n", size);
+	//printf("type cmds => %d \n", prog_->cmds[i].type_);
+	
+	while (i < size) {
+		switch (prog_->cmds[i].type_) {
+			case 1: // expr
+			{
+					valeur = eval_expr(env_, mem, prog_->cmds[i].expr);
+					printf("v => %d\n", valeur);
+					break;
+				}
+			case 2: // def_const
+					env_ = eval_def_const(prog_->cmds[i].def_const, env_, mem);
+					break;
+			/*case 3: // def_fun
+					env_ = eval_def_fun(prog_->cmds[i].def_fun, env_);
+					break;
+			case 4: // def_rec
+					env_ = eval_def_rec(prog_->cmds[i].def_rec, env_);
+					break;*/
+			case 8 : 
+					if (prog_->cmds[i].stat_->tag == ASTEcho){
+						valeur = eval_expr(env_, mem, prog_->cmds[i].stat_->content.echo.expr);
+						printf("v => %d\n", valeur);
+					}
+					break;
+			default:
+					printf("Erreur\n");
+		}
+		i++;
+	}
+	print_env(env_);
+	printf("Resultat => %d\n", valeur);
+}
+
+env* eval_def_const(def def_const, env* env_, int* mem){
+	env* new_env = malloc(sizeof(env));
+	new_env->tag = ASTConst;
+	new_env->id = def_const->content.defConst.id;
+	int valeur_expr;
+	valeur_expr = eval_expr(env_, mem, def_const->content.defConst.expr);
+	new_env->content.valeur = valeur_expr;
+	new_env->suite = env_;
+	return new_env;
+}
+
+env* copy_env(env* env_){
+	env* p = env_;
+	env* copy = malloc(sizeof(env));
+	env* p_copy = copy;
+	while (p != NULL) { 
+		p_copy->id = p->id;
+		p_copy->tag = p->tag;
+		if (p_copy->tag == ASTConst){
+			p_copy->content.valeur = p->content.valeur;
+		} else if (p_copy->tag == ASTFun){
+			p_copy->content.def_fun.closure_ = p->content.def_fun.closure_;
+		} else {
+			p_copy = NULL;
+		}
+		p = p->suite;
+		if(p != NULL){
+			p_copy->suite = NULL;
+			p_copy->suite = malloc(sizeof(env));
+			p_copy = p_copy->suite;
+		}		
+	}
+	if (env_ == NULL) copy = NULL;
+	return copy;
+}
+
+int eval_expr(env* env, int* mem, Sexpr expr){
 	switch (expr->tag) {
 		case ASTNum:
 				return expr->content.num;
@@ -134,7 +266,7 @@ int eval_expr(env* env_, Sexpr expr){
 				if (!(strcmp(expr->content.boolean, "true"))) return 1;
 					else return 0;
 				break;
-		case ASTId:
+		/*case ASTId:
 				return cherche_id_env(env_, expr->content.id);
 				break;
 		case ASTNot:
@@ -213,138 +345,8 @@ int eval_expr(env* env_, Sexpr expr){
 		case ASTAbs:{
 				return -10;
 				break;
-			}
+			}*/
 		default:
 				return -3;
     }	
-}
-
-env* copy_env(env* env_){
-	env* p = env_;
-	env* copy = malloc(sizeof(env));
-	env* p_copy = copy;
-	while (p != NULL) { 
-		p_copy->id = p->id;
-		p_copy->tag = p->tag;
-		if (p_copy->tag == ASTConst){
-			p_copy->content.valeur = p->content.valeur;
-		} else if (p_copy->tag == ASTFun){
-			p_copy->content.def_fun.closure_ = p->content.def_fun.closure_;
-		} else {
-			p_copy = NULL;
-		}
-		p = p->suite;
-		if(p != NULL){
-			p_copy->suite = NULL;
-			p_copy->suite = malloc(sizeof(env));
-			p_copy = p_copy->suite;
-		}		
-	}
-	if (env_ == NULL) copy = NULL;
-	return copy;
-}
-
-env* eval_def_fun(def def_fun, env* env_){
-	env* new_env = malloc(sizeof(env));
-	new_env->id = def_fun->content.defFun.id;
-	new_env->tag = ASTFun;
-	new_env->content.def_fun.closure_ = malloc(sizeof(closure));
-	new_env->content.def_fun.closure_->corp = def_fun->content.defFun.expr;
-	new_env->content.def_fun.closure_->ids_ = malloc(sizeof(ids));
-	new_env->content.def_fun.closure_->ids_ = args_to_ids(def_fun->content.defFun.arg_);
-	new_env->content.def_fun.closure_->env_ = copy_env(env_);
-	new_env->suite = env_;
-	return new_env;
-}
-
-env* eval_def_rec(def def_rec, env* env_){
-	env* new_env = malloc(sizeof(env));
-	new_env->id = def_rec->content.defRecFun.id;
-	new_env->tag = ASTRecFun;
-	new_env->content.def_rec.closure_rec_ = malloc(sizeof(closure_rec));
-	new_env->content.def_rec.closure_rec_->corp = def_rec->content.defRecFun.expr;
-	new_env->content.def_rec.closure_rec_->ids_ = malloc(sizeof(ids));
-	new_env->content.def_rec.closure_rec_->ids_ = args_to_ids(def_rec->content.defRecFun.arg_);
-	new_env->content.def_rec.closure_rec_->env_ = copy_env(env_);
-	new_env->content.def_rec.closure_rec_->id = def_rec->content.defRecFun.id;
-	new_env->suite = env_;
-	return new_env;
-}
-
-env* eval_def_const(def def_const, env* env_){
-	env* new_env = malloc(sizeof(env));
-	new_env->tag = ASTConst;
-	new_env->id = def_const->content.defConst.id;
-	int valeur_expr;
-	valeur_expr = eval_expr(env_, def_const->content.defConst.expr);
-	new_env->content.valeur = valeur_expr;
-	new_env->suite = env_;
-	return new_env;
-}
-
-void print_env(env* env_){
-	env* p = env_;
-	while(p != NULL){
-		printf("=========\n");
-		printf("id : %s\n", p->id);
-		if (p->tag == ASTConst)
-			printf("v : %d\n", p->content.valeur);
-		else if (p->tag == ASTFun) {
-			printf("closure : \n");
-			printf("expr : ");printSexpr(p->content.def_fun.closure_->corp);printf("\n");
-			printf("args : ");printIds(p->content.def_fun.closure_->ids_);printf("\n");
-			printf("env : ");print_env(p->content.def_fun.closure_->env_);printf("\n");
-		}
-		else if (p->tag == ASTRecFun) {
-			printf("closure_rec : \n");
-			printf("id : %s\n", p->content.def_rec.closure_rec_->id);
-			printf("expr : ");printSexpr(p->content.def_rec.closure_rec_->corp);printf("\n");
-			printf("args : ");printIds(p->content.def_rec.closure_rec_->ids_);printf("\n");
-			printf("env : ");print_env(p->content.def_rec.closure_rec_->env_);printf("\n");
-		}
-		p = p->suite;
-	}
-}
-
-void eval_prog(prog* prog_){
-	env* env_ = NULL;
-	int valeur = -404;
-	int size = prog_->size;
-	int i = 0;
-	printf("###prog####\n");
-	printf("#1 : expr\n");
-	printf("#2 : def_const\n");
-	printf("size : %d\n\n", size);
-	//printf("type cmds => %d \n", prog_->cmds[i].type_);
-	
-	while (i < size) {
-		switch (prog_->cmds[i].type_) {
-			case 1: // expr
-			{
-					valeur = eval_expr(env_, prog_->cmds[i].expr);
-					printf("v => %d\n", valeur);
-					break;
-				}
-			case 2: // def_const
-					env_ = eval_def_const(prog_->cmds[i].def_const, env_);
-					break;
-			case 3: // def_fun
-					env_ = eval_def_fun(prog_->cmds[i].def_fun, env_);
-					break;
-			case 4: // def_rec
-					env_ = eval_def_rec(prog_->cmds[i].def_rec, env_);
-					break;
-			case 8 : 
-					if (prog_->cmds[i].stat_->tag == ASTEcho){
-						valeur = eval_expr(env_, prog_->cmds[i].stat_->content.echo.expr);
-						printf("v => %d\n", valeur);
-					}
-					break;
-			default:
-					printf("Erreur\n");
-		}
-		i++;
-	}
-	print_env(env_);
-	printf("Resultat => %d\n", valeur);
 }

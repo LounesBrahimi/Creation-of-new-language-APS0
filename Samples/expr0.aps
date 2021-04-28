@@ -1,15 +1,1 @@
-[
-  VAR x int;
-  PROC REC incr [n:int]
-    [
-      IF (lt x 42)
-        [
-	  SET x (add x n);
-	  CALL incr n
-	]
-	[ ECHO x ]
-    ];
-  SET x 21;
-  ECHO x;
-  CALL incr 1
-]
+[CONST a int 42;FUN f int [x:int] (sub x a);FUN REC g bool [x:int](if (lt x 0) false(if (eq x 0) true(g (f x))));ECHO (g 255)]

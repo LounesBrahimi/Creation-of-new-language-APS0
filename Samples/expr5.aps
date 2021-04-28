@@ -1,6 +1,4 @@
-[ 
-CONST y int 42;
-FUN f int [x:int] (sub x 7);
-CONST z int 10;
-ECHO y
+[
+	CONST a int 42;
+	ECHO 7
 ]
