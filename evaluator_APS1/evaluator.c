@@ -307,25 +307,25 @@ int eval_expr(env* env_, int* mem, Sexpr expr){
 				return eval_expr(env_, mem, expr->content.div.e1)
 							/ eval_expr(env_, mem, expr->content.div.e2);
 				break;
-		/*case ASTAnd:
-				if (!(eval_expr(env_, expr->content.and_.e1))) return 0;
-					else return eval_expr(env_, expr->content.and_.e2);
+		case ASTAnd:
+				if (!(eval_expr(env_, mem, expr->content.and_.e1))) return 0;
+					else return eval_expr(env_, mem, expr->content.and_.e2);
 				break;
 		case ASTOr:
-				if (eval_expr(env_, expr->content.or_.e1)) return 1;
-					else return eval_expr(env_, expr->content.or_.e2);
+				if (eval_expr(env_, mem, expr->content.or_.e1)) return 1;
+					else return eval_expr(env_, mem, expr->content.or_.e2);
 				break;
 		case ASTEq:
-				if (eval_expr(env_, expr->content.eq.e1) == eval_expr(env_, expr->content.eq.e2)) 
+				if (eval_expr(env_, mem, expr->content.eq.e1) == eval_expr(env_, mem, expr->content.eq.e2)) 
 					return 1;
 					else return 0;
 				break;
 		case ASTLt:
-				if (eval_expr(env_, expr->content.eq.e1) < eval_expr(env_, expr->content.eq.e2)) 
+				if (eval_expr(env_, mem, expr->content.eq.e1) < eval_expr(env_, mem, expr->content.eq.e2)) 
 					return 1;
 					else return 0;
 				break;
-		case ASTIf:
+		/*case ASTIf:
 				if (eval_expr(env_, expr->content.if_.cond)) 
 					return eval_expr(env_, expr->content.if_.cons);
 					else return eval_expr(env_, expr->content.if_.alt);
