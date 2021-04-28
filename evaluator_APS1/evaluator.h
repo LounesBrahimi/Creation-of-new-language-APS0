@@ -52,7 +52,7 @@ env* ajout_closure_rec_env(env* env_, closure_rec* closure_rec_);
 closure_rec* get_closure_rec(env* env_, char* id);
 env* lier_args_vals_env(env* env_, ids* ids_, valeurs* valeurs_);
 void printValeurs(valeurs* valeurs_);
-valeurs* exprs_to_valeurs(env* env_, Sexprs es);
+valeurs* exprs_to_valeurs(env* env_, Sexprs es, int* mem);
 closure* get_closure(env* env_, char* id);
 void printIds(ids* ids_);
 ids* args_to_ids(arg arg_);

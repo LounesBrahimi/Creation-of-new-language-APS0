@@ -91,8 +91,8 @@ closure_rec* get_closure_rec(env* env_, char* id){
 	}
 	return NULL;
 }
-/*
-valeurs* exprs_to_valeurs(env* env_, Sexprs es){
+
+valeurs* exprs_to_valeurs(env* env_, Sexprs es, int* mem){
 	Sexprs p = es; 
 	valeurs* valeurs_ = malloc(sizeof(valeurs));
 	valeurs_->v = NULL;
@@ -101,14 +101,14 @@ valeurs* exprs_to_valeurs(env* env_, Sexprs es){
 	while(p != NULL){
 		size++;
 		valeurs_->v = (int*) realloc(valeurs_->v, size*sizeof(int));
-		valeurs_->v[i] = eval_expr(env_, p->head);
+		valeurs_->v[i] = eval_expr(env_, mem, p->head);
 		i++;
 		p = p->tail;
 	}
 	valeurs_->size = size;
 	return valeurs_;	
 }
-*/
+
 env* lier_args_vals_env(env* env_, ids* ids_, valeurs* valeurs_){
 	env* new_env = NULL;
 	env* p = NULL;
@@ -330,15 +330,15 @@ int eval_expr(env* env_, int* mem, Sexpr expr){
 					return eval_expr(env_, mem, expr->content.if_.cons);
 					else return eval_expr(env_, mem, expr->content.if_.alt);
 				break;
-		/*case ASTApp:{
+		case ASTApp:{
 				Sexpr e = expr->content.app.fun;
 				Sexprs es = expr->content.app.args;
 				if ((get_closure(env_, getId(e))) != NULL) {
 					closure* closure_ = get_closure(env_, e->content.id);
-					valeurs* valeurs_ = exprs_to_valeurs(env_, es);
+					valeurs* valeurs_ = exprs_to_valeurs(env_, es, mem);
 					env* env_tmp = lier_args_vals_env(closure_->env_, closure_->ids_, valeurs_);
-					return eval_expr(env_tmp, closure_->corp);
-				} else if ((get_closure_rec(env_, getId(e))) != NULL) {
+					return eval_expr(env_tmp, mem, closure_->corp);
+				}/* else if ((get_closure_rec(env_, getId(e))) != NULL) {
 					closure_rec* closure_rec_ = get_closure_rec(env_, e->content.id);
 					valeurs* valeurs_ = exprs_to_valeurs(env_, es);
 					env* env_tmp = lier_args_vals_env(closure_rec_->env_, closure_rec_->ids_, valeurs_);				
@@ -354,12 +354,12 @@ int eval_expr(env* env_, int* mem, Sexpr expr){
 					valeurs* valeurs_ = exprs_to_valeurs(env_, es);
 					env* env_tmp = lier_args_vals_env(closure_->env_, closure_->ids_, valeurs_);
 					return eval_expr(env_tmp, closure_->corp);	
-				} else {
+				} */else {
 					return -5;
 				} 
 				break;
 				}
-		case ASTAbs:{
+		/*case ASTAbs:{
 				return -10;
 				break;
 			}*/
