@@ -92,7 +92,7 @@ closure_rec* get_closure_rec(env* env_, char* id){
 	return NULL;
 }
 
-valeurs* exprs_to_valeurs(env* env_, Sexprs es, int* mem){
+valeurs* exprs_to_valeurs(env* env_, Sexprs es, mem* mem_){
 	Sexprs p = es; 
 	valeurs* valeurs_ = malloc(sizeof(valeurs));
 	valeurs_->v = NULL;
@@ -101,7 +101,7 @@ valeurs* exprs_to_valeurs(env* env_, Sexprs es, int* mem){
 	while(p != NULL){
 		size++;
 		valeurs_->v = (int*) realloc(valeurs_->v, size*sizeof(int));
-		valeurs_->v[i] = eval_expr(env_, mem, p->head);
+		valeurs_->v[i] = eval_expr(env_, mem_, p->head);
 		i++;
 		p = p->tail;
 	}
@@ -119,6 +119,7 @@ env* lier_args_vals_env(env* env_, ids* ids_, valeurs* valeurs_){
 		}
 		new_env = malloc(sizeof(env));
 		new_env->tag = ASTConst;
+		new_env->adresse = false;
 		new_env->id = ids_->arg_[i];
 		new_env->content.valeur = valeurs_->v[i];
 		if (i) {
@@ -134,15 +135,17 @@ env* ajout_closure_rec_env(env* env_, closure_rec* closure_rec_){
 	env* new_env = malloc(sizeof(env));
 	new_env->id = closure_rec_->id;
 	new_env->tag = ASTRecFun;
+	new_env->adresse = false;
 	new_env->content.def_rec.closure_rec_ = closure_rec_;
 	new_env->suite = env_;
 	return new_env;
 }
 
-env* eval_def_fun(def def_fun, env* env_, int* mem){
+env* eval_def_fun(def def_fun, env* env_, mem* mem_){
 	env* new_env = malloc(sizeof(env));
 	new_env->id = def_fun->content.defFun.id;
 	new_env->tag = ASTFun;
+	new_env->adresse = false;
 	new_env->content.def_fun.closure_ = malloc(sizeof(closure));
 	new_env->content.def_fun.closure_->corp = def_fun->content.defFun.expr;
 	new_env->content.def_fun.closure_->ids_ = malloc(sizeof(ids));
@@ -152,10 +155,11 @@ env* eval_def_fun(def def_fun, env* env_, int* mem){
 	return new_env;
 }
 
-env* eval_def_rec(def def_rec, env* env_, int* mem){
+env* eval_def_rec(def def_rec, env* env_, mem* mem_){
 	env* new_env = malloc(sizeof(env));
 	new_env->id = def_rec->content.defRecFun.id;
 	new_env->tag = ASTRecFun;
+	new_env->adresse = false;
 	new_env->content.def_rec.closure_rec_ = malloc(sizeof(closure_rec));
 	new_env->content.def_rec.closure_rec_->corp = def_rec->content.defRecFun.expr;
 	new_env->content.def_rec.closure_rec_->ids_ = malloc(sizeof(ids));
@@ -186,13 +190,18 @@ void print_env(env* env_){
 			printf("args : ");printIds(p->content.def_rec.closure_rec_->ids_);printf("\n");
 			printf("env : ");print_env(p->content.def_rec.closure_rec_->env_);printf("\n");
 		}
+		else if (p->tag == ASTVar) {
+			printf("#Var# : \n");
+			printf("id : %s\n", p->id);
+			printf("v : %d\n", p->content.valeur);
+		}
 		p = p->suite;
 	}
 }
 
 void eval_prog(prog* prog_){
 	env* env_ = NULL;
-	int* mem = NULL;
+	mem* mem_ = NULL;
 	int valeur = -404;
 	int size = prog_->size;
 	int i = 0;
@@ -206,22 +215,25 @@ void eval_prog(prog* prog_){
 		switch (prog_->cmds[i].type_) {
 			case 1: // expr
 			{
-					valeur = eval_expr(env_, mem, prog_->cmds[i].expr);
+					valeur = eval_expr(env_, mem_, prog_->cmds[i].expr);
 					printf("v => %d\n", valeur);
 					break;
 				}
 			case 2: // def_const
-					env_ = eval_def_const(prog_->cmds[i].def_const, env_, mem);
+					env_ = eval_def_const(prog_->cmds[i].def_const, env_, mem_);
 					break;
 			case 3: // def_fun
-					env_ = eval_def_fun(prog_->cmds[i].def_fun, env_, mem);
+					env_ = eval_def_fun(prog_->cmds[i].def_fun, env_, mem_);
 					break;
 			case 4: // def_rec
-					env_ = eval_def_rec(prog_->cmds[i].def_rec, env_, mem);
+					env_ = eval_def_rec(prog_->cmds[i].def_rec, env_, mem_);
+					break;
+			case 5: // def_var
+					env_ = eval_def_var(prog_->cmds[i].def_var, env_, &mem_);
 					break;
 			case 8 : 
 					if (prog_->cmds[i].stat_->tag == ASTEcho){
-						valeur = eval_expr(env_, mem, prog_->cmds[i].stat_->content.echo.expr);
+						valeur = eval_expr(env_, mem_, prog_->cmds[i].stat_->content.echo.expr);
 						printf("v => %d\n", valeur);
 					}
 					break;
@@ -234,16 +246,50 @@ void eval_prog(prog* prog_){
 	printf("Resultat => %d\n", valeur);
 }
 
-env* eval_def_const(def def_const, env* env_, int* mem){
+env* eval_def_const(def def_const, env* env_, mem* mem_){
 	env* new_env = malloc(sizeof(env));
 	new_env->tag = ASTConst;
+	new_env->adresse = false;
 	new_env->id = def_const->content.defConst.id;
 	int valeur_expr;
-	valeur_expr = eval_expr(env_, mem, def_const->content.defConst.expr);
+	valeur_expr = eval_expr(env_, mem_, def_const->content.defConst.expr);
 	new_env->content.valeur = valeur_expr;
 	new_env->suite = env_;
 	return new_env;
 }
+
+env* eval_def_var(def def_var, env* env_, mem** mem_){
+	env* new_env = malloc(sizeof(env));
+	new_env->tag = ASTVar;
+	new_env->adresse = true;
+	new_env->id = def_var->content.defVar.id;
+	*mem_ = alloc(*mem_);
+	new_env->content.valeur = (*mem_)->last_adr;
+	new_env->suite = env_;
+	return new_env;
+}
+
+mem* alloc(mem* mem_){
+	if (mem_ == NULL){
+		mem_ = malloc(sizeof(mem));
+		mem_->last_adr = 0;
+		mem_->content = malloc(sizeof(adr_val));
+		mem_->content->adresse = 0;
+		mem_->content->valeure = ANY;
+		return mem_;
+	} else {
+		mem_->last_adr++;
+		int adresse = mem_->last_adr;
+		adr_val* tmp = malloc(sizeof(adr_val));;
+		tmp->adresse = adresse;
+		tmp->valeure = ANY;
+		mem_->content = realloc(mem_->content, (adresse+1)*sizeof(adr_val));
+		mem_->content[adresse] = *tmp;
+		tmp = NULL;
+		return mem_;
+	}
+}
+
 
 env* copy_env(env* env_){
 	env* p = env_;
@@ -270,7 +316,7 @@ env* copy_env(env* env_){
 	return copy;
 }
 
-int eval_expr(env* env_, int* mem, Sexpr expr){
+int eval_expr(env* env_, mem* mem_, Sexpr expr){
 	int indice = -9999;
 	switch (expr->tag) {
 		case ASTNum:
@@ -289,63 +335,63 @@ int eval_expr(env* env_, int* mem, Sexpr expr){
 					//return env_[indice].content.valeur;
 				break;
 		case ASTNot:
-				if (eval_expr(env_, mem, expr->content.not_.e))
+				if (eval_expr(env_, mem_, expr->content.not_.e))
 					return 0;
 				else return 1;
 				break;
 		case ASTAdd:
-				return eval_expr(env_, mem, expr->content.add.e1)
-							+ eval_expr(env_, mem, expr->content.add.e2);
+				return eval_expr(env_, mem_, expr->content.add.e1)
+							+ eval_expr(env_, mem_, expr->content.add.e2);
 				break;
 		case ASTMul:
-				return eval_expr(env_, mem, expr->content.mul.e1)
-							* eval_expr(env_, mem, expr->content.mul.e2);
+				return eval_expr(env_, mem_, expr->content.mul.e1)
+							* eval_expr(env_, mem_, expr->content.mul.e2);
 				break;
 		case ASTSub:
-				return eval_expr(env_, mem, expr->content.sub.e1)
-							- eval_expr(env_, mem, expr->content.sub.e2);
+				return eval_expr(env_, mem_, expr->content.sub.e1)
+							- eval_expr(env_, mem_, expr->content.sub.e2);
 				break;
 		case ASTDiv:
-				return eval_expr(env_, mem, expr->content.div.e1)
-							/ eval_expr(env_, mem, expr->content.div.e2);
+				return eval_expr(env_, mem_, expr->content.div.e1)
+							/ eval_expr(env_, mem_, expr->content.div.e2);
 				break;
 		case ASTAnd:
-				if (!(eval_expr(env_, mem, expr->content.and_.e1))) return 0;
-					else return eval_expr(env_, mem, expr->content.and_.e2);
+				if (!(eval_expr(env_, mem_, expr->content.and_.e1))) return 0;
+					else return eval_expr(env_, mem_, expr->content.and_.e2);
 				break;
 		case ASTOr:
-				if (eval_expr(env_, mem, expr->content.or_.e1)) return 1;
-					else return eval_expr(env_, mem, expr->content.or_.e2);
+				if (eval_expr(env_, mem_, expr->content.or_.e1)) return 1;
+					else return eval_expr(env_, mem_, expr->content.or_.e2);
 				break;
 		case ASTEq: 
-				if (eval_expr(env_, mem, expr->content.eq.e1) == eval_expr(env_, mem, expr->content.eq.e2)) 
+				if (eval_expr(env_, mem_, expr->content.eq.e1) == eval_expr(env_, mem_, expr->content.eq.e2)) 
 					return 1;
 					else return 0;
 				break;
 		case ASTLt:
-				if (eval_expr(env_, mem, expr->content.eq.e1) < eval_expr(env_, mem, expr->content.eq.e2)) 
+				if (eval_expr(env_, mem_, expr->content.eq.e1) < eval_expr(env_, mem_, expr->content.eq.e2)) 
 					return 1;
 					else return 0;
 				break;
 		case ASTIf:
-				if (eval_expr(env_, mem, expr->content.if_.cond)) 
-					return eval_expr(env_, mem, expr->content.if_.cons);
-					else return eval_expr(env_, mem, expr->content.if_.alt);
+				if (eval_expr(env_, mem_, expr->content.if_.cond)) 
+					return eval_expr(env_, mem_, expr->content.if_.cons);
+					else return eval_expr(env_, mem_, expr->content.if_.alt);
 				break;
 		case ASTApp:{
 				Sexpr e = expr->content.app.fun;
 				Sexprs es = expr->content.app.args;
 				if ((get_closure(env_, getId(e))) != NULL) {
 					closure* closure_ = get_closure(env_, e->content.id);
-					valeurs* valeurs_ = exprs_to_valeurs(env_, es, mem);
+					valeurs* valeurs_ = exprs_to_valeurs(env_, es, mem_);
 					env* env_tmp = lier_args_vals_env(closure_->env_, closure_->ids_, valeurs_);
-					return eval_expr(env_tmp, mem, closure_->corp);
+					return eval_expr(env_tmp, mem_, closure_->corp);
 				} else if ((get_closure_rec(env_, getId(e))) != NULL) {
 					closure_rec* closure_rec_ = get_closure_rec(env_, e->content.id);
-					valeurs* valeurs_ = exprs_to_valeurs(env_, es, mem);
+					valeurs* valeurs_ = exprs_to_valeurs(env_, es, mem_);
 					env* env_tmp = lier_args_vals_env(closure_rec_->env_, closure_rec_->ids_, valeurs_);				
 					env_tmp = ajout_closure_rec_env(env_tmp, closure_rec_);
-					return eval_expr(env_tmp, mem, closure_rec_->corp);
+					return eval_expr(env_tmp, mem_, closure_rec_->corp);
 				} else if (tagOf(e) == ASTAbs){
 					closure* closure_ = malloc(sizeof(closure));
 					closure_->corp = e->content.abstract.expr;
@@ -353,18 +399,18 @@ int eval_expr(env* env_, int* mem, Sexpr expr){
 					closure_->ids_ = args_to_ids(e->content.abstract.arg_);
 					closure_->env_ = copy_env(env_);
 					
-					valeurs* valeurs_ = exprs_to_valeurs(env_, es, mem);
+					valeurs* valeurs_ = exprs_to_valeurs(env_, es, mem_);
 					env* env_tmp = lier_args_vals_env(closure_->env_, closure_->ids_, valeurs_);
-					return eval_expr(env_tmp, mem, closure_->corp);	
+					return eval_expr(env_tmp, mem_, closure_->corp);	
 				} else {
 					return -5;
 				} 
 				break;
 				}
-		/*case ASTAbs:{
+		case ASTAbs:{
 				return -10;
 				break;
-			}*/
+			}
 		default:
 				return -3;
     }	
