@@ -201,6 +201,6 @@ int main(int argc, char **argv) {
   printf("])");
   //printDef(def_const);
   printf(".\n");
-  eval_prog(prog_);
+  eval_prog(NULL, NULL, prog_);
   return 0;
 }

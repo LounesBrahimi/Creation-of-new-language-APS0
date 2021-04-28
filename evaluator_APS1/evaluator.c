@@ -223,16 +223,47 @@ mem* stat_set(env* env_, mem* mem_, stat stat_){
 	return affectation_mem(mem_, adresse, valeur);
 }
 
-void eval_prog(prog* prog_){
-	env* env_ = NULL;
-	mem* mem_ = NULL;
+mem* eval_block(env* env_, mem* mem_, prog* block){
+	
+}
+
+mem* stat_IF(env* env_, mem** mem_, stat stat_){
+	int taille = -1;
+	if (eval_expr(env_, *mem_,  stat_->content.if_block.condition)){
+		if (*mem_ == NULL){
+			taille = 0;
+		} else {
+			taille = (*mem_)->last_adr;
+		}
+		eval_prog(env_, (*mem_), stat_->content.if_block.block1);
+		if (taille) {
+			mem_ = realloc(mem_, taille*sizeof(mem));
+		}
+		return (*mem_);
+	} else {
+		if (*mem_ == NULL){
+			taille = 0;
+		} else {
+			taille = (*mem_)->last_adr;
+		}
+		eval_prog(env_, (*mem_), stat_->content.if_block.block2);
+		if (taille) {
+			mem_ = realloc(mem_, taille*sizeof(mem));
+		}
+		return (*mem_);
+	}
+}
+
+void eval_prog(env* env__, mem* mem__, prog* prog_){
+	env* env_ =  env__;
+	mem* mem_ = mem__;
 	int valeur = -404;
 	int size = prog_->size;
 	int i = 0;
-	printf("###prog####\n");
-	printf("#1 : expr\n");
-	printf("#2 : def_const\n");
-	printf("size : %d\n\n", size);
+	//printf("###prog####\n");
+	//printf("#1 : expr\n");
+	//printf("#2 : def_const\n");
+	//printf("size : %d\n\n", size);
 	//printf("type cmds => %d \n", prog_->cmds[i].type_);
 	
 	while (i < size) {
@@ -261,6 +292,8 @@ void eval_prog(prog* prog_){
 						printf("v => %d\n", valeur);
 					} else if (prog_->cmds[i].stat_->tag == ASTSet){
 						mem_ = stat_set(env_, mem_, prog_->cmds[i].stat_);
+					} else if (prog_->cmds[i].stat_->tag == ASTIfBlock){
+						mem_ = stat_IF(env_, &mem_, prog_->cmds[i].stat_);
 					}
 					break;
 			default:
@@ -363,7 +396,6 @@ int eval_expr(env* env_, mem* mem_, Sexpr expr){
 						return mem_->content[valeur].valeure;
 					}
 				}
-				//return  cherche_id_env(env_, expr->content.id);
 				break;
 		case ASTNot:
 				if (eval_expr(env_, mem_, expr->content.not_.e))

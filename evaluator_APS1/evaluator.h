@@ -78,7 +78,7 @@ void print_env(env* env_);
 int cherche_id_env(env* env_, char* id);
 int eval_expr(env* env_, mem* mem_, Sexpr expr);
 env* eval_def_const(def def_const, env* env_, mem* mem_);
-void eval_prog(prog* prog_);
+void eval_prog(env* env_, mem* mem_, prog* prog_);
 // retourne l'indice de l'id dans l'environnement
 int indice_id_env(env* env_, char* id);
 mem* alloc(mem* mem_);
@@ -87,3 +87,4 @@ int cherche_id_adr_env(env* env_, char* id);
 mem* stat_set(env* env_, mem* mem_, stat stat_);
 // affecte la valeur à l'adresse indiqué dans la memoire
 mem* affectation_mem(mem* mem_, int adresse, int valeur);
+mem* stat_IF(env* env_, mem** mem_, stat stat_);
