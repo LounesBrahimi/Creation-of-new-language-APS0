@@ -13,6 +13,7 @@ typedef struct _valeurs valeurs;
 typedef struct _mem mem;
 typedef struct _adr_val adr_val;
 typedef struct _closure_proc closure_proc;
+typedef struct _closure_proc_rec closure_proc_rec;
 
 struct _mem {
 	int last_adr;
@@ -40,6 +41,9 @@ struct _env {
 		struct {
 			closure_proc* closure_proc_;
 		} def_proc;
+		struct {
+			closure_proc_rec* closure_proc_rec_;
+		} def_proc_rec;
 	} content;
 };
 
@@ -57,6 +61,13 @@ struct _closure {
 };
 
 struct _closure_proc {
+	prog* block;
+	ids* ids_;
+	env*  env_;
+};
+
+struct _closure_proc_rec {
+	char* id;
 	prog* block;
 	ids* ids_;
 	env*  env_;
@@ -100,4 +111,4 @@ mem* stat_set(env* env_, mem* mem_, stat stat_);
 mem* affectation_mem(mem* mem_, int adresse, int valeur);
 mem* stat_IF(env* env_, mem** mem_, stat stat_);
 mem* stat_while(env* env_, mem** mem_, stat stat_);
-
+env* eval_def_proc_rec(def def_rec_proc, env* env_, mem* mem_);

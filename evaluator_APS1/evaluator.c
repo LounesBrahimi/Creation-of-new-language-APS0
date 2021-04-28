@@ -141,6 +141,36 @@ env* ajout_closure_rec_env(env* env_, closure_rec* closure_rec_){
 	return new_env;
 }
 
+env* eval_def_rec(def def_rec, env* env_, mem* mem_){
+	env* new_env = malloc(sizeof(env));
+	new_env->id = def_rec->content.defRecFun.id;
+	new_env->tag = ASTRecFun;
+	new_env->adresse = false;
+	new_env->content.def_rec.closure_rec_ = malloc(sizeof(closure_rec));
+	new_env->content.def_rec.closure_rec_->corp = def_rec->content.defRecFun.expr;
+	new_env->content.def_rec.closure_rec_->ids_ = malloc(sizeof(ids));
+	new_env->content.def_rec.closure_rec_->ids_ = args_to_ids(def_rec->content.defRecFun.arg_);
+	new_env->content.def_rec.closure_rec_->env_ = copy_env(env_);
+	new_env->content.def_rec.closure_rec_->id = def_rec->content.defRecFun.id;
+	new_env->suite = env_;
+	return new_env;
+}
+
+env* eval_def_proc_rec(def def_rec_proc, env* env_, mem* mem_){
+	env* new_env = malloc(sizeof(env));
+	new_env->id = def_rec_proc->content.def_rec_proc.id;
+	new_env->tag = ASTRecProc;
+	new_env->adresse = false;
+	new_env->content.def_proc_rec.closure_proc_rec_ = malloc(sizeof(closure_proc_rec));
+	new_env->content.def_proc_rec.closure_proc_rec_->block = def_rec_proc->content.def_rec_proc.block;
+	new_env->content.def_proc_rec.closure_proc_rec_->ids_ = malloc(sizeof(ids));
+	new_env->content.def_proc_rec.closure_proc_rec_->ids_ = args_to_ids(def_rec_proc->content.def_rec_proc.arg_);
+	new_env->content.def_proc_rec.closure_proc_rec_->env_ = copy_env(env_);
+	new_env->content.def_proc_rec.closure_proc_rec_->id = def_rec_proc->content.def_rec_proc.id;
+	new_env->suite = env_;
+	return new_env;
+}
+
 env* eval_def_proc(def def_proc, env* env_, mem* mem_){
 	env* new_env = malloc(sizeof(env));
 	new_env->id = def_proc->content.defProc.id;
@@ -165,21 +195,6 @@ env* eval_def_fun(def def_fun, env* env_, mem* mem_){
 	new_env->content.def_fun.closure_->ids_ = malloc(sizeof(ids));
 	new_env->content.def_fun.closure_->ids_ = args_to_ids(def_fun->content.defFun.arg_);
 	new_env->content.def_fun.closure_->env_ = copy_env(env_);
-	new_env->suite = env_;
-	return new_env;
-}
-
-env* eval_def_rec(def def_rec, env* env_, mem* mem_){
-	env* new_env = malloc(sizeof(env));
-	new_env->id = def_rec->content.defRecFun.id;
-	new_env->tag = ASTRecFun;
-	new_env->adresse = false;
-	new_env->content.def_rec.closure_rec_ = malloc(sizeof(closure_rec));
-	new_env->content.def_rec.closure_rec_->corp = def_rec->content.defRecFun.expr;
-	new_env->content.def_rec.closure_rec_->ids_ = malloc(sizeof(ids));
-	new_env->content.def_rec.closure_rec_->ids_ = args_to_ids(def_rec->content.defRecFun.arg_);
-	new_env->content.def_rec.closure_rec_->env_ = copy_env(env_);
-	new_env->content.def_rec.closure_rec_->id = def_rec->content.defRecFun.id;
 	new_env->suite = env_;
 	return new_env;
 }
@@ -214,6 +229,13 @@ void print_env(env* env_){
 			printf("args : ");printIds(p->content.def_proc.closure_proc_->ids_);printf("\n");
 			printf("env : ");print_env(p->content.def_proc.closure_proc_->env_);printf("\n");
 			printf("block : \n");print_prog(p->content.def_proc.closure_proc_->block);printf("\n");
+		}
+		else if (p->tag == ASTRecProc) {
+			printf("#Proc Rec# : \n");
+			printf("args : ");printIds(p->content.def_proc_rec.closure_proc_rec_->ids_);printf("\n");
+			printf("env : ");print_env(p->content.def_proc_rec.closure_proc_rec_->env_);printf("\n");
+			printf("block : \n");print_prog(p->content.def_proc_rec.closure_proc_rec_->block);printf("\n");
+			printf("id : %s\n", p->content.def_proc_rec.closure_proc_rec_->id);
 		}
 		p = p->suite;
 	}
@@ -322,6 +344,9 @@ void eval_prog(env* env__, mem* mem__, prog* prog_){
 					break;
 			case 6: // def_proc
 					env_ = eval_def_proc(prog_->cmds[i].def_proc, env_, mem_);
+					break;
+			case 7: // def_proc_rec
+					env_ = eval_def_proc_rec(prog_->cmds[i].def_rec_proc, env_, mem_);
 					break;
 			case 8 : 
 					if (prog_->cmds[i].stat_->tag == ASTEcho){
