@@ -139,8 +139,8 @@ env* ajout_closure_rec_env(env* env_, closure_rec* closure_rec_){
 	return new_env;
 }
 
-/*
-env* eval_def_fun(def def_fun, env* env_){
+
+env* eval_def_fun(def def_fun, env* env_, int* mem){
 	env* new_env = malloc(sizeof(env));
 	new_env->id = def_fun->content.defFun.id;
 	new_env->tag = ASTFun;
@@ -152,7 +152,7 @@ env* eval_def_fun(def def_fun, env* env_){
 	new_env->suite = env_;
 	return new_env;
 }
-
+/*
 env* eval_def_rec(def def_rec, env* env_){
 	env* new_env = malloc(sizeof(env));
 	new_env->id = def_rec->content.defRecFun.id;
@@ -214,10 +214,10 @@ void eval_prog(prog* prog_){
 			case 2: // def_const
 					env_ = eval_def_const(prog_->cmds[i].def_const, env_, mem);
 					break;
-			/*case 3: // def_fun
-					env_ = eval_def_fun(prog_->cmds[i].def_fun, env_);
+			case 3: // def_fun
+					env_ = eval_def_fun(prog_->cmds[i].def_fun, env_, mem);
 					break;
-			case 4: // def_rec
+			/*case 4: // def_rec
 					env_ = eval_def_rec(prog_->cmds[i].def_rec, env_);
 					break;*/
 			case 8 : 

@@ -56,7 +56,7 @@ valeurs* exprs_to_valeurs(env* env_, Sexprs es);
 closure* get_closure(env* env_, char* id);
 void printIds(ids* ids_);
 ids* args_to_ids(arg arg_);
-env* eval_def_fun(def def_fun, env* env_);
+env* eval_def_fun(def def_fun, env* env_, int* mem);
 void print_env(env* env_);
 int cherche_id_env(env* env_, char* id);
 int eval_expr(env* env_, int* mem, Sexpr expr);
