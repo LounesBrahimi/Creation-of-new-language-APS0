@@ -286,28 +286,28 @@ int eval_expr(env* env_, int* mem, Sexpr expr){
 				if (env_[indice].tag == ASTConst) 
 					return env_[indice].content.valeur;
 				break;
-		/*case ASTNot:
-				if (eval_expr(env_, expr->content.not_.e))
+		case ASTNot:
+				if (eval_expr(env_, mem, expr->content.not_.e))
 					return 0;
 				else return 1;
 				break;
 		case ASTAdd:
-				return eval_expr(env_, expr->content.add.e1)
-							+ eval_expr(env_, expr->content.add.e2);
+				return eval_expr(env_, mem, expr->content.add.e1)
+							+ eval_expr(env_, mem, expr->content.add.e2);
 				break;
 		case ASTMul:
-				return eval_expr(env_, expr->content.mul.e1)
-							* eval_expr(env_, expr->content.mul.e2);
+				return eval_expr(env_, mem, expr->content.mul.e1)
+							* eval_expr(env_, mem, expr->content.mul.e2);
 				break;
 		case ASTSub:
-				return eval_expr(env_, expr->content.sub.e1)
-							- eval_expr(env_, expr->content.sub.e2);
+				return eval_expr(env_, mem, expr->content.sub.e1)
+							- eval_expr(env_, mem, expr->content.sub.e2);
 				break;
 		case ASTDiv:
-				return eval_expr(env_, expr->content.div.e1)
-							/ eval_expr(env_, expr->content.div.e2);
+				return eval_expr(env_, mem, expr->content.div.e1)
+							/ eval_expr(env_, mem, expr->content.div.e2);
 				break;
-		case ASTAnd:
+		/*case ASTAnd:
 				if (!(eval_expr(env_, expr->content.and_.e1))) return 0;
 					else return eval_expr(env_, expr->content.and_.e2);
 				break;
