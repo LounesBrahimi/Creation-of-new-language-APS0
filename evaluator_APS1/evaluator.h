@@ -12,6 +12,7 @@ typedef struct _ids ids;
 typedef struct _valeurs valeurs;
 typedef struct _mem mem;
 typedef struct _adr_val adr_val;
+typedef struct _closure_proc closure_proc;
 
 struct _mem {
 	int last_adr;
@@ -36,6 +37,9 @@ struct _env {
 		struct {
 			closure_rec* closure_rec_;
 		} def_rec;
+		struct {
+			closure_proc* closure_proc_;
+		} def_proc;
 	} content;
 };
 
@@ -48,6 +52,12 @@ struct _closure_rec {
 
 struct _closure {
 	Sexpr corp;
+	ids* ids_;
+	env*  env_;
+};
+
+struct _closure_proc {
+	prog* block;
 	ids* ids_;
 	env*  env_;
 };
@@ -74,6 +84,7 @@ ids* args_to_ids(arg arg_);
 env* eval_def_fun(def def_fun, env* env_, mem* mem_);
 env* eval_def_rec(def def_rec, env* env_, mem* mem_);
 env* eval_def_var(def def_var, env* env_, mem** mem_);
+env* eval_def_proc(def def_proc, env* env_, mem* mem_);
 void print_env(env* env_);
 int cherche_id_env(env* env_, char* id);
 int eval_expr(env* env_, mem* mem_, Sexpr expr);

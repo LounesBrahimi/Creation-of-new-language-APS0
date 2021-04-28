@@ -141,6 +141,20 @@ env* ajout_closure_rec_env(env* env_, closure_rec* closure_rec_){
 	return new_env;
 }
 
+env* eval_def_proc(def def_proc, env* env_, mem* mem_){
+	env* new_env = malloc(sizeof(env));
+	new_env->id = def_proc->content.defProc.id;
+	new_env->tag = ASTProc;
+	new_env->adresse = false;
+	new_env->content.def_proc.closure_proc_ = malloc(sizeof(closure_proc));
+	new_env->content.def_proc.closure_proc_->block = def_proc->content.defProc.block;
+	new_env->content.def_proc.closure_proc_->ids_ = malloc(sizeof(ids));
+	new_env->content.def_proc.closure_proc_->ids_ = args_to_ids(def_proc->content.defProc.arg_);
+	new_env->content.def_proc.closure_proc_->env_ = copy_env(env_);
+	new_env->suite = env_;
+	return new_env;
+}
+
 env* eval_def_fun(def def_fun, env* env_, mem* mem_){
 	env* new_env = malloc(sizeof(env));
 	new_env->id = def_fun->content.defFun.id;
@@ -194,6 +208,12 @@ void print_env(env* env_){
 			printf("#Var# : \n");
 			printf("id : %s\n", p->id);
 			printf("v : %d\n", p->content.valeur);
+		}
+		else if (p->tag == ASTProc) {
+			printf("#Proc# : \n");
+			printf("args : ");printIds(p->content.def_proc.closure_proc_->ids_);printf("\n");
+			printf("env : ");print_env(p->content.def_proc.closure_proc_->env_);printf("\n");
+			printf("block : \n");print_prog(p->content.def_proc.closure_proc_->block);printf("\n");
 		}
 		p = p->suite;
 	}
@@ -299,6 +319,9 @@ void eval_prog(env* env__, mem* mem__, prog* prog_){
 					break;
 			case 5: // def_var
 					env_ = eval_def_var(prog_->cmds[i].def_var, env_, &mem_);
+					break;
+			case 6: // def_proc
+					env_ = eval_def_proc(prog_->cmds[i].def_proc, env_, mem_);
 					break;
 			case 8 : 
 					if (prog_->cmds[i].stat_->tag == ASTEcho){
