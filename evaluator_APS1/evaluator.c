@@ -223,8 +223,22 @@ mem* stat_set(env* env_, mem* mem_, stat stat_){
 	return affectation_mem(mem_, adresse, valeur);
 }
 
-mem* eval_block(env* env_, mem* mem_, prog* block){
-	
+mem* stat_while(env* env_, mem** mem_, stat stat_){
+	int taille = -1;
+	if (eval_expr(env_, *mem_,  stat_->content.while_.condition)){
+		if (*mem_ == NULL){
+			taille = 0;
+		} else {
+			taille = (*mem_)->last_adr;
+		}
+		eval_prog(env_, (*mem_), stat_->content.while_.block);
+		if (taille) {
+			mem_ = realloc(mem_, taille*sizeof(mem));
+		}
+		*mem_ = stat_while(env_, mem_, stat_);
+	} else {
+		return *mem_;
+	}
 }
 
 mem* stat_IF(env* env_, mem** mem_, stat stat_){
@@ -294,6 +308,8 @@ void eval_prog(env* env__, mem* mem__, prog* prog_){
 						mem_ = stat_set(env_, mem_, prog_->cmds[i].stat_);
 					} else if (prog_->cmds[i].stat_->tag == ASTIfBlock){
 						mem_ = stat_IF(env_, &mem_, prog_->cmds[i].stat_);
+					} else if (prog_->cmds[i].stat_->tag == ASTWhile){
+						mem_ = stat_while(env_, &mem_, prog_->cmds[i].stat_);
 					}
 					break;
 			default:

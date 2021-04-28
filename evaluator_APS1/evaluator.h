@@ -88,3 +88,5 @@ mem* stat_set(env* env_, mem* mem_, stat stat_);
 // affecte la valeur à l'adresse indiqué dans la memoire
 mem* affectation_mem(mem* mem_, int adresse, int valeur);
 mem* stat_IF(env* env_, mem** mem_, stat stat_);
+mem* stat_while(env* env_, mem** mem_, stat stat_);
+
