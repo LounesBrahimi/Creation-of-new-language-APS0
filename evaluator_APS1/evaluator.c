@@ -152,8 +152,8 @@ env* eval_def_fun(def def_fun, env* env_, int* mem){
 	new_env->suite = env_;
 	return new_env;
 }
-/*
-env* eval_def_rec(def def_rec, env* env_){
+
+env* eval_def_rec(def def_rec, env* env_, int* mem){
 	env* new_env = malloc(sizeof(env));
 	new_env->id = def_rec->content.defRecFun.id;
 	new_env->tag = ASTRecFun;
@@ -166,7 +166,7 @@ env* eval_def_rec(def def_rec, env* env_){
 	new_env->suite = env_;
 	return new_env;
 }
-*/
+
 void print_env(env* env_){
 	env* p = env_;
 	while(p != NULL){
@@ -217,9 +217,9 @@ void eval_prog(prog* prog_){
 			case 3: // def_fun
 					env_ = eval_def_fun(prog_->cmds[i].def_fun, env_, mem);
 					break;
-			/*case 4: // def_rec
-					env_ = eval_def_rec(prog_->cmds[i].def_rec, env_);
-					break;*/
+			case 4: // def_rec
+					env_ = eval_def_rec(prog_->cmds[i].def_rec, env_, mem);
+					break;
 			case 8 : 
 					if (prog_->cmds[i].stat_->tag == ASTEcho){
 						valeur = eval_expr(env_, mem, prog_->cmds[i].stat_->content.echo.expr);
