@@ -325,12 +325,12 @@ int eval_expr(env* env_, int* mem, Sexpr expr){
 					return 1;
 					else return 0;
 				break;
-		/*case ASTIf:
-				if (eval_expr(env_, expr->content.if_.cond)) 
-					return eval_expr(env_, expr->content.if_.cons);
-					else return eval_expr(env_, expr->content.if_.alt);
+		case ASTIf:
+				if (eval_expr(env_, mem, expr->content.if_.cond)) 
+					return eval_expr(env_, mem, expr->content.if_.cons);
+					else return eval_expr(env_, mem, expr->content.if_.alt);
 				break;
-		case ASTApp:{
+		/*case ASTApp:{
 				Sexpr e = expr->content.app.fun;
 				Sexprs es = expr->content.app.args;
 				if ((get_closure(env_, getId(e))) != NULL) {
