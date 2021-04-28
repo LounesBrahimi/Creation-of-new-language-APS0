@@ -113,3 +113,5 @@ mem* stat_IF(env* env_, mem** mem_, stat stat_);
 mem* stat_while(env* env_, mem** mem_, stat stat_);
 env* eval_def_proc_rec(def def_rec_proc, env* env_, mem* mem_);
 mem* stat_call(env* env_, mem** mem_, stat stat_);
+closure_proc_rec* get_closure_proc_rec(env* env_, char* id);
+env* ajout_closure_rec_env_proc(env* env_, closure_proc_rec* closure_rec_proc);

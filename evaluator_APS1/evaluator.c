@@ -60,6 +60,22 @@ int indice_id_env(env* env_, char* id){
 	return -2;
 }
 
+closure_proc_rec* get_closure_proc_rec(env* env_, char* id){
+	env* p = env_;
+	while(p != NULL){
+		if (!(strcmp(p->id, id))){
+			if (p->tag == ASTRecProc)
+				return p->content.def_proc_rec.closure_proc_rec_;
+			else 
+				p = p->suite;
+		}
+		else {
+			p = p->suite;
+		}
+	}
+	return NULL;
+}
+
 closure_proc* get_closure_proc(env* env_, char* id){
 	env* p = env_;
 	while(p != NULL){
@@ -144,6 +160,16 @@ env* lier_args_vals_env(env* env_, ids* ids_, valeurs* valeurs_){
 			new_env->suite = env_;
 		}	
 	} 
+	return new_env;
+}
+
+env* ajout_closure_rec_env_proc(env* env_, closure_proc_rec* closure_rec_proc){
+	env* new_env = malloc(sizeof(env));
+	new_env->id = closure_rec_proc->id;
+	new_env->tag = ASTRecProc;
+	new_env->adresse = false;
+	new_env->content.def_proc_rec.closure_proc_rec_ = closure_rec_proc;
+	new_env->suite = env_;
 	return new_env;
 }
 
@@ -288,9 +314,14 @@ mem* stat_call(env* env_, mem** mem_, stat stat_){
 			valeurs* valeurs_ = exprs_to_valeurs(env_, es, *mem_);
 			env* env_tmp = lier_args_vals_env(closure_proc_->env_, closure_proc_->ids_, valeurs_);
 			eval_prog(env_tmp, *mem_, closure_proc_->block);
+		} else if (get_closure_proc_rec(env_, stat_->content.call_.id) != NULL){
+			closure_proc_rec* closure_proc_rec_ = get_closure_proc_rec(env_, stat_->content.call_.id);
+			valeurs* valeurs_ = exprs_to_valeurs(env_, es, *mem_);
+			env* env_tmp = lier_args_vals_env(closure_proc_rec_->env_, closure_proc_rec_->ids_, valeurs_);
+		    env_tmp = ajout_closure_rec_env_proc(env_tmp, closure_proc_rec_);
+			eval_prog(env_tmp, *mem_, closure_proc_rec_->block);
 		}
 	return *mem_;
-		printf("---------------fin call ---------------\n");
 }
 
 mem* stat_while(env* env_, mem** mem_, stat stat_){
