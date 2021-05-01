@@ -25,7 +25,7 @@ typedef struct _stat* stat;
 
 enum _tag {
   ASTNum, ASTId, ASTApp, ASTBool, ASTAbs, ASTIf, ASTAnd, ASTOr, ASTAdd, ASTMul, ASTEq, ASTSub, ASTDiv,
-  ASTLt, ASTNot
+  ASTLt, ASTNot, ASTIdAdr
 };
 
 enum _tag_def {
@@ -37,7 +37,7 @@ enum _Tag_stat {
 };
 
 enum _tag_type {
-  ASTTypePrim, ASTTypeFunc, ASTTypeMultyPar
+  ASTTypePrim, ASTTypeFunc, ASTTypeMultyPar, ASTTypePrimVar
 };
 
 struct _type{
@@ -56,6 +56,7 @@ struct _type{
 };
 
 struct _arg{
+	tag_type tag;
 	char* id;
 	char* type_;
 	struct _arg* suivant;
@@ -195,6 +196,7 @@ struct _sexprs {
 
 Sexpr newASTNum(int n);
 Sexpr newASTId(char* x);
+Sexpr newASTIdAdr(char* x);
 Sexpr newASTBool(char* b);
 Sexpr newASTApp(Sexpr e, Sexprs es);
 Sexpr newASTAbs(arg arg_, Sexpr expr);
@@ -217,6 +219,7 @@ def newDefProc(char* id, arg arg_, prog* block);
 def newDefRecProc(char* id, arg arg_, prog* block);
 
 arg newDefArg(char* id, type type_);
+arg newDefArgVar(char* id, type type_);
 arg addArg(arg arg_1, arg arg_2);
 
 type newTypePrim(char* type_);

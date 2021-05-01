@@ -46,11 +46,18 @@ void printType(type t){
 
 void printArgs(arg a){
 	arg tmp = a;
-	
-	printf("args([(%s,%s)", tmp->id, tmp->type_);
+	if(tmp->tag == ASTTypePrimVar){
+		printf("args([(%s,ref(%s))", tmp->id, tmp->type_);
+	} else {
+		printf("args([(%s,%s)", tmp->id, tmp->type_);
+	}
 	while (tmp->suivant != NULL){ 
         tmp = tmp->suivant;
-        printf(", (%s,%s)", tmp->id, tmp->type_);
+		if(tmp->tag == ASTTypePrimVar){
+			printf(", (%s,ref(%s))", tmp->id, tmp->type_);
+		} else {
+			printf(", (%s,%s)", tmp->id, tmp->type_);
+		}
 	}
 	printf("])");
 }
@@ -188,6 +195,10 @@ void printSexpr(Sexpr e) {
 	printf("not(");
 	printSexpr(e->content.not_.e);			
 	printf(")");	
+	break;
+  }
+  case ASTIdAdr : {
+	printf("adr(%s)", getId(e));	
 	break;
   }
   }

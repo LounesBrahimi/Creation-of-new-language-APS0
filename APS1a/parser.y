@@ -63,6 +63,7 @@ int yyerror (char *);
 %token       WHILE
 %token       CALL
 %token       var
+%token       ADR
 
 
 %union {
@@ -92,6 +93,8 @@ int yyerror (char *);
 %type<block> cmdsBlock
 %type<arg_> Argsp
 %type<arg_> Argp
+%type<exprs> Exprsp
+%type<expr> Exprp
 
 %start prog
 %%
@@ -122,7 +125,7 @@ stat: ECHO expr		   { $$ = newEcho($2); }
 | SET IDENT expr       { $$ = newSet($2, $3); }
 | IFB expr Block Block { $$ = newIfBlock($2, $3, $4); }
 | WHILE expr Block     { $$ = newWhile($2, $3); }
-| CALL IDENT exprs      { $$ = newCall($2, $3); }
+| CALL IDENT Exprsp      { $$ = newCall($2, $3); }
   ;
 
 def: 
@@ -136,12 +139,12 @@ def:
 
 Argsp:
 	Argp			{ $$ = $1; }
-|	Argp COMMA Argsp { $$ = $1; }
+|	Argp COMMA Argsp { $$ = addArg($1, $3); }
   ;
   
 Argp: 
 	IDENT DDOTS type { $$ = newDefArg($1, $3); }
-|	var IDENT DDOTS type { $$ = newDefArg($2, $4); }
+|	var IDENT DDOTS type { $$ = newDefArgVar($2, $4); }
   ;
 
 args:
@@ -183,8 +186,18 @@ expr:
 | LPAR DIV expr expr RPAR     { $$ = newASTDiv($3, $4); }
 | LPAR LT expr expr RPAR     { $$ = newASTLt($3, $4); }
 | LPAR NOT expr RPAR     { $$ = newASTNot($3); }
-
 ;
+
+Exprp:
+	expr					{ $$ = $1; }
+|	LPAR ADR IDENT RPAR		{ $$ = newASTIdAdr($3); }
+  ;
+
+Exprsp:
+	Exprp	{ $$ = addSexpr($1,NULL); }
+|	Exprp Exprsp	{ $$ = addSexpr($1,$2); }
+  ;
+
 exprs:
   expr       { $$ = addSexpr($1,NULL); }
 | expr exprs { $$ = addSexpr($1,$2); }

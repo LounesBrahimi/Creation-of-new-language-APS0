@@ -40,9 +40,9 @@ expr(G, TYPE, app(EXPR,AEXPR)) :- typeaexprs(G,AEXPR,TYPESAE), expr(G,arrow(TYPE
 expr(G,arrow(TYPES,TYPE),abst(args(ARGS),EXPR)) :- typeargs(ARGS,TYPES),append(ARGS,G,NEWG),expr(NEWG,TYPE,EXPR).
 
 %%recupere le type des expressions pour l'application
-typeaexprs(G,[E|[]],[TYPE]) :- expr(G,TYPE, E).
-typeaexprs(G,[E|ES],[TYPE|TYPES]) :- expr(G,TYPE,E) , typeaexprs(G,ES,TYPES).
-
+typeaexprs(G,[E|[]],[TYPE]) :- exprp(G,TYPE, E).
+typeaexprs(G,[E|ES],[TYPE|TYPES]) :- exprp(G,TYPE,E) , typeaexprs(G,ES,TYPES).
+ 
 %%
 dec(G, (def(id(X), T, E)), [(X,T)|G]) :- expr(G, T, E).
 
@@ -89,6 +89,10 @@ decs(G, (id(X),TYPE,EXPR), [(X,TYPE)|G]):- expr(G, TYPE, EXPR).
 decfun(G,(id(X),TYPE,ARGS,EXPR),[(X,arrow(TYPEARGS,TYPE))|G]) :- fun(G,(TYPE,ARGS,EXPR)), typeargs(ARGS, TYPEARGS).
 decfunrec(G,(id(X),TYPE,ARGS,EXPR),[(X,arrow(TYPEARGS,TYPE))|G]) :- fun(G,(TYPE,[(X,arrow(TYPEARGS,TYPE))|ARGS],EXPR)), typeargs(ARGS, TYPEARGS).
 decsVar(G,(id(X),T),[(X,ref(T))|G]) :- type(T).
+
+%%ref
+exprp(G, ref(T), adr(X)) :- assoc(X, G, ref(T)).
+exprp(G, T, E) :- expr(G, T, E).
 
 %%cmds
 cmds(G, [defRecProc(id(X),args(ARGS),block(CMDS))|LCMDS], void) :- decsRecProc(G,(id(X),ARGS, block(CMDS)),NEWG) ,cmds(NEWG, LCMDS, void).

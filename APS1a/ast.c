@@ -18,6 +18,13 @@ Sexpr newASTNum(int v) {
   return r;
 }
 
+Sexpr newASTIdAdr(char* v) {
+  Sexpr r = mallocSexpr;
+  r->tag = ASTIdAdr;
+  r->content.id = v;
+  return r;
+}
+
 Sexpr newASTId(char* v) {
   Sexpr r = mallocSexpr;
   r->tag = ASTId;
@@ -137,8 +144,18 @@ type newTypePrim(char* type_){
 	t->content.typePrim = type_;
 }
 
+arg newDefArgVar(char* id_, type type_){
+	arg a = mallocArg;
+	a->tag = ASTTypePrimVar;
+	a->id = id_;
+	a->type_ = type_->content.typePrim;
+	a->suivant = NULL;
+	return a;
+}
+
 arg newDefArg(char* id_, type type_){
 	arg a = mallocArg;
+	a->tag = ASTTypePrim;
 	a->id = id_;
 	a->type_ = type_->content.typePrim;
 	a->suivant = NULL;

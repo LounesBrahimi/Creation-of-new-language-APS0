@@ -91,6 +91,8 @@ idents [a-zA-Z][a-zA-Z0-9]*
 
 "var" { return(var); }
 
+"adr" { return(ADR); }
+
 {nums}    {
             yylval.num=atoi(yytext);
             return(NUM);
