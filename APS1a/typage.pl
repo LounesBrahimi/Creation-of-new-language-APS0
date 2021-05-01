@@ -16,6 +16,7 @@ type(bool).
 expr(_, int, num(N)) :- num(N).
 expr(_ , bool, boolean(B)) :- boolean(B).
 expr(G, T, id(X)) :- assoc(X, G, T).
+expr(G, T, id(X)) :- assoc(X, G, ref(T)).
 
 %% fonctions primitives
 expr(G, int, add(E1, E2)) :- expr(G, int, E1), expr(G, int, E2).
