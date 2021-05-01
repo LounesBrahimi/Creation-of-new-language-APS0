@@ -74,6 +74,7 @@ struct _closure_proc_rec {
 };
 
 struct _ids {
+	bool* adresse;
 	char** arg_;
 	int size;
 };
@@ -115,3 +116,5 @@ env* eval_def_proc_rec(def def_rec_proc, env* env_, mem* mem_);
 mem* stat_call(env* env_, mem** mem_, stat stat_);
 closure_proc_rec* get_closure_proc_rec(env* env_, char* id);
 env* ajout_closure_rec_env_proc(env* env_, closure_proc_rec* closure_rec_proc);
+int eval_exprp(env* env_, mem* mem_, Sexpr expr);
+bool type_adr_arg(env* env_, char* id);

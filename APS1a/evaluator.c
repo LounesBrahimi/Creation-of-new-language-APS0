@@ -20,11 +20,18 @@ ids* args_to_ids(arg arg_){
 	arg p = arg_;
 	ids* ids_ = malloc(sizeof(ids));
 	ids_->arg_ = NULL;
+	ids_->adresse = NULL;
 	int size = 0;
 	int i = 0;
 	while(p != NULL){
 		size++;
 		ids_->arg_ = realloc(ids_->arg_, size*sizeof(char*));
+		ids_->adresse = realloc(ids_->adresse, size*sizeof(bool));
+		if(p->tag == ASTTypePrimVar){
+			ids_->adresse[i] = true;
+		} else {
+			ids_->adresse[i] = false;
+		}
 		ids_->arg_[i] = p->id;
 		i++;
 		p = p->suivant;
@@ -33,10 +40,28 @@ ids* args_to_ids(arg arg_){
 	return ids_;
 }
 
+bool type_adr_arg(env* env_, char* id){
+	env* p = env_;
+	while(p != NULL){
+		if (!(strcmp(p->id, id))){
+			if (p->adresse){
+				return true;
+			} else {
+				return false;
+			}
+		}
+		else {
+			p = p->suite;
+		}
+	}
+	p = NULL;
+	return NULL;
+}
+
 int cherche_id_env(env* env_, char* id){
 	env* p = env_;
 	while(p != NULL){
-		if ((!(strcmp(p->id, id))) && (!(p->adresse))){
+		if (!(strcmp(p->id, id))){
 			return p->content.valeur;
 		}
 		else {
@@ -133,7 +158,13 @@ valeurs* exprs_to_valeurs(env* env_, Sexprs es, mem* mem_){
 	while(p != NULL){
 		size++;
 		valeurs_->v = (int*) realloc(valeurs_->v, size*sizeof(int));
-		valeurs_->v[i] = eval_expr(env_, mem_, p->head);
+		//print_env(env_);
+		if(p->head->tag == ASTIdAdr) {
+			valeurs_->v[i] = eval_exprp(env_, mem_, p->head);
+			printf("valeur : %d\n", valeurs_->v[i]);
+		} else {
+			valeurs_->v[i] = eval_expr(env_, mem_, p->head);
+		}
 		i++;
 		p = p->tail;
 	}
@@ -151,7 +182,11 @@ env* lier_args_vals_env(env* env_, ids* ids_, valeurs* valeurs_){
 		}
 		new_env = malloc(sizeof(env));
 		new_env->tag = ASTConst;
-		new_env->adresse = false;
+		if(ids_->adresse[i]) {
+			new_env->adresse = true;
+		} else {
+			new_env->adresse = false;
+		}
 		new_env->id = ids_->arg_[i];
 		new_env->content.valeur = valeurs_->v[i];
 		if (i) {
@@ -285,8 +320,10 @@ void print_env(env* env_){
 
 int cherche_id_adr_env(env* env_, char* id){
 	env* p = env_;
+	printf("id rechercher : %s\n", id);
+	//print_env(env_);
 	while(p != NULL){
-		if ((!(strcmp(p->id, id))) && (p->adresse)){
+		if (!(strcmp(p->id, id))){
 			return p->content.valeur;
 		}
 		else {
@@ -301,13 +338,19 @@ mem* affectation_mem(mem* mem_, int adresse, int valeur){
 	return mem_;
 }
 
+
 mem* stat_set(env* env_, mem* mem_, stat stat_){
+	printf("#### set #####\n");
 	int adresse = cherche_id_adr_env(env_, stat_->content.set.id);
+	printf("adresse : %d\n", adresse);
 	int valeur = eval_expr(env_, mem_, stat_->content.set.e);
+	printf("valeur => : %d\n", valeur);
+	printf("-------set ------\n");
 	return affectation_mem(mem_, adresse, valeur);
 }
 
 mem* stat_call(env* env_, mem** mem_, stat stat_){
+	printf("call\n");
 	Sexprs es = stat_->content.call_.expr;
 		if (get_closure_proc(env_, stat_->content.call_.id) != NULL) {
 			closure_proc* closure_proc_ = get_closure_proc(env_, stat_->content.call_.id);
@@ -399,7 +442,9 @@ void eval_prog(env* env__, mem* mem__, prog* prog_){
 					env_ = eval_def_rec(prog_->cmds[i].def_rec, env_, mem_);
 					break;
 			case 5: // def_var
+			printf("dec var\n");
 					env_ = eval_def_var(prog_->cmds[i].def_var, env_, &mem_);
+					printf("dec var\n");
 					break;
 			case 6: // def_proc
 					env_ = eval_def_proc(prog_->cmds[i].def_proc, env_, mem_);
@@ -506,6 +551,16 @@ env* copy_env(env* env_){
 	return copy;
 }
 
+int eval_exprp(env* env_, mem* mem_, Sexpr expr){
+	int indice = -9999;
+	int valeur = -9999;
+	printf("recherche de l'adresse\n");
+	valeur = cherche_id_adr_env(env_, expr->content.id);
+	if (!(valeur == -99999997)){printf("***** : %d\n", valeur);
+		return valeur;
+	}
+}
+
 int eval_expr(env* env_, mem* mem_, Sexpr expr){
 	int indice = -9999;
 	int valeur = -9999;
@@ -517,17 +572,27 @@ int eval_expr(env* env_, mem* mem_, Sexpr expr){
 				if (!(strcmp(expr->content.boolean, "true"))) return 1;
 					else return 0;
 				break;
+		case ASTIdAdr:
+				printf("#####################################################\n");
+				break;
 		case ASTId:
-				printf("recherche de Z\n");
+				printf("recherche de id dans expr : %s\n", expr->content.id);
+				print_env(env_);
 				valeur = cherche_id_env(env_, expr->content.id);
-				if (!(valeur == -99999996)){printf("####\n");
+				printf("val : %d\n", valeur);
+				if(type_adr_arg(env_, expr->content.id)){
+					return mem_->content[valeur].valeure;
+				} else {printf("##################{{{{\n");
+					return valeur;
+				}
+				/*if (!(valeur == -99999996)){printf("####\n");
 					return valeur;
 				} else {
 					valeur = cherche_id_adr_env(env_, expr->content.id);
 					if (!(valeur == -99999997)){printf("***** : %d\n", valeur);
 						return mem_->content[valeur].valeure;
 					}
-				}
+				}*/
 				break;
 		case ASTNot:
 				if (eval_expr(env_, mem_, expr->content.not_.e))
