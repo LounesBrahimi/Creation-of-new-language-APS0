@@ -29,5 +29,8 @@ clean:
 	rm -f *~
 	rm -f prologTerm
 
-
-
+clean2:
+	rm -f lex.yy.*
+	rm -f y.tab.*
+	rm -f *.o
+	rm -f *~

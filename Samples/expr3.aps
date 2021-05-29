@@ -1,3 +1,0 @@
-[
-ECHO ([x:int, y:int](add x y) 4 2)
-]
