@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+./../prolog_terms_APS0/prologTerm $1 | swipl -s typage.pl -g main_stdin

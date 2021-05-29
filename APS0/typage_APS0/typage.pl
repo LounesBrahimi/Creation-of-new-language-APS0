@@ -88,8 +88,11 @@ cmds(G, [echo(EXPR)|LCMDS], void) :- stat(G, EXPR, void), cmds(G, LCMDS, void).
 prog(LCMDS) :- cmds([], LCMDS, void).
 
 %%typeCheck(P,ok) :- typeProg(P).
-typeCheck(num(N),ok) :- num(N).
-typeCheck(defConst(X,Y,Z),ok) :- defConst(X,Y,Z).
+%%typeCheck(num(N),ok) :- num(N).
+%%typeCheck(defConst(X,Y,Z),ok) :- defConst(X,Y,Z).
+%%typeCheck(_,ko).
+
+typeCheck(P,ok) :- P.
 typeCheck(_,ko).
 
 exitCode(ok) :- halt(0).
