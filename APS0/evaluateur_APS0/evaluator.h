@@ -63,3 +63,4 @@ int cherche_id_env(env* env_, char* id);
 int eval_expr(env* env_, Sexpr expr);
 env* eval_def_const(def def_const, env* env_);
 void eval_prog(prog* prog_);
+env* lier_args_closure_env(env* env_, ids* ids_, closure* closure_);

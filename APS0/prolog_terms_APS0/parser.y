@@ -159,10 +159,8 @@ int main(int argc, char **argv) {
   yyparse();
   fclose(infile);
   printf("prog([");
-  //printSexpr(theExpr);
   print_prog(prog_);
   printf("])");
-  //printDef(def_const);
   printf(".\n");
   return 0;
 }

@@ -203,7 +203,12 @@ int eval_expr(env* env_, Sexpr expr){
 					closure_->env_ = copy_env(env_);
 					
 					valeurs* valeurs_ = exprs_to_valeurs(env_, es);
-					env* env_tmp = lier_args_vals_env(closure_->env_, closure_->ids_, valeurs_);
+					env* env_tmp = NULL;
+					if (valeurs_ != NULL){
+						env_tmp = lier_args_vals_env(closure_->env_, closure_->ids_, valeurs_);
+					} else {
+						env_tmp = lier_args_closure_env(closure_->env_, closure_->ids_, (closure*) es->head);
+					}
 					return eval_expr(env_tmp, closure_->corp);	
 				} else {
 					return -5;
@@ -217,6 +222,27 @@ int eval_expr(env* env_, Sexpr expr){
 		default:
 				return -3;
     }	
+}
+
+env* lier_args_closure_env(env* env_, ids* ids_, closure* closure_){
+	env* new_env = NULL;
+	env* p = NULL;
+	int i;
+	for(i=0; i<ids_->size; i++){
+		if (i) {
+			p = new_env;
+		}
+		new_env = malloc(sizeof(env));
+		new_env->tag = ASTAbs;
+		new_env->id = ids_->arg_[i];
+		new_env->content.def_fun.closure_ = closure_;
+		if (i) {
+			new_env->suite = p;
+		} else {
+			new_env->suite = env_;
+		}	
+	} 
+	return new_env;
 }
 
 env* copy_env(env* env_){
@@ -272,14 +298,27 @@ env* eval_def_rec(def def_rec, env* env_){
 }
 
 env* eval_def_const(def def_const, env* env_){
-	env* new_env = malloc(sizeof(env));
-	new_env->tag = ASTConst;
-	new_env->id = def_const->content.defConst.id;
-	int valeur_expr;
-	valeur_expr = eval_expr(env_, def_const->content.defConst.expr);
-	new_env->content.valeur = valeur_expr;
-	new_env->suite = env_;
-	return new_env;
+	if (def_const->content.defConst.expr->tag != ASTAbs){
+		env* new_env = malloc(sizeof(env));
+		new_env->tag = ASTConst;
+		new_env->id = def_const->content.defConst.id;
+		int valeur_expr;
+		valeur_expr = eval_expr(env_, def_const->content.defConst.expr);
+		new_env->content.valeur = valeur_expr;
+		new_env->suite = env_;
+		return new_env;
+	} else {
+		env* new_env = malloc(sizeof(env));
+		new_env->id = def_const->content.defConst.id;
+		new_env->tag = ASTFun;
+		new_env->content.def_fun.closure_ = malloc(sizeof(closure));
+		new_env->content.def_fun.closure_->corp =  def_const->content.defConst.expr->content.abstract.expr;
+		new_env->content.def_fun.closure_->ids_ = malloc(sizeof(ids));
+		new_env->content.def_fun.closure_->ids_ = args_to_ids(def_const->content.defConst.expr->content.abstract.arg_);
+		new_env->content.def_fun.closure_->env_ = copy_env(env_);
+		new_env->suite = env_;
+		return new_env;		
+	}
 }
 
 void print_env(env* env_){
@@ -311,20 +350,11 @@ void eval_prog(prog* prog_){
 	int valeur = -404;
 	int size = prog_->size;
 	int i = 0;
-	printf("###prog####\n");
-	printf("#1 : expr\n");
-	printf("#2 : def_const\n");
-	printf("size : %d\n\n", size);
-	//printf("type cmds => %d \n", prog_->cmds[i].type_);
-	
 	while (i < size) {
 		switch (prog_->cmds[i].type_) {
 			case 1: // expr
 			{
-					printf("###ici\n");
 					valeur = eval_expr(env_, prog_->cmds[i].expr);
-					printf("v => %d\n", valeur);
-					printf("###ici\n");
 					break;
 				}
 			case 2: // def_const
@@ -341,6 +371,5 @@ void eval_prog(prog* prog_){
 		}
 		i++;
 	}
-	print_env(env_);
-	printf("Resultat => %d\n", valeur);
+	printf("\nResultat => %d\n", valeur);
 }

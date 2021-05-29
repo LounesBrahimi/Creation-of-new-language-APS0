@@ -36,10 +36,8 @@ def newDefConst(char* id_, type type_, Sexpr expr_){
 	def c = mallocDef;
 	c->tag = ASTConst;
 	c->content.defConst.id = id_;
-	c->content.defConst.type_ = type_->content.typePrim;
+	c->content.defConst.type_ = type_;
 	c->content.defConst.expr = expr_;
-	/*printDef(c);
-	printf("\n");*/
 	return c;
 }
 
@@ -50,8 +48,6 @@ def newDefFun(char* id_, type type_, arg arg_, Sexpr expr_){
 	c->content.defFun.type_ = type_;
 	c->content.defFun.arg_ = arg_;
 	c->content.defFun.expr = expr_;
-	/*printDef(c);
-	printf("\n");*/
 	return c;
 }
 
@@ -62,8 +58,6 @@ def newDefRecFun(char* id_, type type_, arg arg_, Sexpr expr_){
 	c->content.defFun.type_ = type_;
 	c->content.defFun.arg_ = arg_;
 	c->content.defFun.expr = expr_;
-	/*printDef(c);
-	printf("\n\n");*/
 	return c;
 }
 
@@ -76,7 +70,7 @@ type newTypePrim(char* type_){
 arg newDefArg(char* id_, type type_){
 	arg a = mallocArg;
 	a->id = id_;
-	a->type_ = type_->content.typePrim;
+	a->type_ = type_;
 	a->suivant = NULL;
 	return a;
 }

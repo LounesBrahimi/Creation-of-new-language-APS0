@@ -51,7 +51,7 @@ struct _type{
 
 struct _arg{
 	char* id;
-	char* type_;
+	type type_;
 	struct _arg* suivant;
 };
 
@@ -60,7 +60,7 @@ struct _def{
 	union{
 		struct {
 			char* id;
-			char* type_;
+			type type_;
 			Sexpr expr;
 		} defConst;
 		struct {

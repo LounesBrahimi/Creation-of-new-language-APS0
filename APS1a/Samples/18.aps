@@ -1,0 +1,6 @@
+[
+CONST a int 42;
+FUN f int [x:int] (sub x a);
+FUN REC g int [x:int](if (lt x 0) 1(if (eq x 0) 0(g (f x))));
+ECHO (g 255)
+]

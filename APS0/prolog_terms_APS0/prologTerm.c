@@ -25,16 +25,43 @@ void printBoolean(char* x) {
 }
 
 void printDefConst(def c){
+	printf("defConst(");
+	printId(c->content.defConst.id);
+	if (c->content.defConst.type_->tag == ASTTypePrim){
+		printf(", type(%s), ", c->content.defConst.type_->content.typePrim);
+	} else {
+		printf(", ");
+		printType(c->content.defConst.type_);
+		printf(", ");
+	}
 	switch(c->content.defConst.expr->tag) {
-		case ASTNum : printf("defConst("); printId(c->content.defConst.id); printf(", type(%s), ", c->content.defConst.type_); printNum(c->content.defConst.expr->content.num);  printf(")"); break;
-/*supr*/case ASTId :  printf("Const %s %s %s", c->content.defConst.id, c->content.defConst.type_, c->content.defConst.expr->content.id); break;
-		case ASTBool :printf("defConst("); printId(c->content.defConst.id); printf(", type(%s), ", c->content.defConst.type_); printBoolean(c->content.defConst.expr->content.boolean); printf(")"); break;
+		case ASTNum :    printNum(c->content.defConst.expr->content.num);  printf(")"); break;
+		case ASTBool :   printBoolean(c->content.defConst.expr->content.boolean); printf(")"); break;
+		default :    printSexpr(c->content.defConst.expr); printf(")"); break;
+	}
+}
+
+void printTypeOuntF(type t){
+	switch(t->tag){
+		case ASTTypeFunc : printf("arrow(");
+							printType(t->content.typeFunc.parm); 
+							printf(", "); 
+							printType(t->content.typeFunc.sortie); 
+							printf(")"); 
+							break;
+		case ASTTypePrim : printf("%s", t->content.typePrim); break;
+		case ASTTypeMultyPar : printType(t->content.typeMultyPar.actuel); printf("*"); printType(t->content.typeMultyPar.suivant); break;
 	}
 }
 
 void printType(type t){
 	switch(t->tag){
-		case ASTTypeFunc : printf("type(");printType(t->content.typeFunc.parm); printf("->"); printType(t->content.typeFunc.sortie); printf(")"); break;
+		case ASTTypeFunc : printf("arrow([");
+							printTypeOuntF(t->content.typeFunc.parm); 
+							printf("], "); 
+							printTypeOuntF(t->content.typeFunc.sortie); 
+							printf(")"); 
+							break;
 		case ASTTypePrim : printf("type(%s)", t->content.typePrim); break;
 		case ASTTypeMultyPar : printType(t->content.typeMultyPar.actuel); printf("*"); printType(t->content.typeMultyPar.suivant); break;
 	}
@@ -42,30 +69,32 @@ void printType(type t){
 
 void printArgs(arg a){
 	arg tmp = a;
+	if (tmp->type_->tag == ASTTypePrim){
+		printf("args([(%s,%s)", tmp->id, tmp->type_->content.typePrim);
+	} else {
+		printf("args([(%s,", tmp->id);
+		printType(tmp->type_);
+		printf(")");
+	}
 	
-	printf("args([(%s,%s)", tmp->id, tmp->type_);
 	while (tmp->suivant != NULL){ 
         tmp = tmp->suivant;
-        printf(", (%s,%s)", tmp->id, tmp->type_);
+        if (tmp->type_->tag == ASTTypePrim){
+			printf(", (%s,%s)", tmp->id, tmp->type_->content.typePrim);
+		} else {
+			printf(", (%s,", tmp->id);
+			printType(tmp->type_);
+			printf(")");
+		}
 	}
 	printf("])");
 }
 
 void printDefFun(def c){
-	/*switch(c->content.defFun.expr->tag) {
-		case ASTNum : printf("Fun %s ", c->content.defFun.id); printType(c->content.defFun.type_); printArgs(c->content.defFun.arg_); printf(" %d", c->content.defFun.expr->content.num); break;
-		case ASTId :  printf("Fun %s ",c->content.defFun.id); printType(c->content.defFun.type_); printArgs(c->content.defFun.arg_);	printf("%s",c->content.defFun.expr->content.id); break;
-		case ASTBool :printf("Fun %s ", c->content.defFun.id); printType(c->content.defFun.type_); printArgs(c->content.defFun.arg_); printf(" %s", c->content.defFun.expr->content.boolean); break;
-	}*/
 	printf("defFun("); printId(c->content.defFun.id);printf(", "); printType(c->content.defFun.type_); printf(", "); printArgs(c->content.defFun.arg_); printf(", "); printSexpr(c->content.defFun.expr); printf(")");
 }
 
 void printDefRecFun(def c){
-	/*switch(c->content.defRecFun.expr->tag) {
-		case ASTNum : printf("Fun Rec %s ", c->content.defRecFun.id); printType(c->content.defFun.type_); printArgs(c->content.defRecFun.arg_); printf(" %d", c->content.defRecFun.expr->content.num); break;
-		case ASTId :  printf("Fun Rec %s ",c->content.defRecFun.id); printType(c->content.defFun.type_); printArgs(c->content.defRecFun.arg_);	printf("%s",c->content.defRecFun.expr->content.id); break;
-		case ASTBool :printf("Fun Rec %s ", c->content.defRecFun.id); printType(c->content.defFun.type_); printArgs(c->content.defRecFun.arg_); printf(" %s", c->content.defRecFun.expr->content.boolean); break;
-	}*/
 	printf("defFunRec(");printId(c->content.defRecFun.id); printf(", "); printType(c->content.defFun.type_); printf(", "); printArgs(c->content.defRecFun.arg_); printf(", "); printSexpr(c->content.defRecFun.expr); printf(")");
 }
 
